@@ -10,7 +10,7 @@ class SpaceAdmin(admin.ModelAdmin):
 
 @admin.register(LogEntry)
 class LogEntry(admin.ModelAdmin):
-    list_display = ('action_time', 'user', 'object_repr', 'change_message')
+    list_display = ('action_time', 'user', 'object_repr', '__str__')
     date_hierarchy = 'action_time'
     list_filter = ('user',)
     search_fields = ('object_repr',)
@@ -21,6 +21,17 @@ class LogEntry(admin.ModelAdmin):
 class WorkflowModelAdmin(admin.ModelAdmin):
     access_rules = {}
     change_form_template = 'django_admin_workflow/change_form.html'
+    def log_change(self, request, obj, message):
+        return super().log_change(request, obj, message)
+
+    def response_change(self, request, obj):
+        return super().response_change(request, obj)
+
+    def construct_change_message(self, request, form, formsets, add=False):
+        return super().construct_change_message(request, form, formsets, add)
+
+    def render_change_form(self, request, context, add=False, change=False, form_url="", obj=None):
+        return super().render_change_form(request, context, add, change, form_url, obj)
 
     def save_model(self, request, obj, form, change):
         if not change:

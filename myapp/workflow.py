@@ -27,12 +27,14 @@ _access_rules_analysis = {
     # Groupe "clients"
     'clients': {
 
+        # partitionnement
+        'filter': lambda q, user_space, user: q.filter(space=user_space.group.name),
+
+        # accès des champs à la création
         'creation': {
             'fields': ['name', 'contact', 'status'],
             'readonly_fields': ['contact', 'status'],
         },
-
-        'filter': lambda q, user_space, user: q.filter(space=user_space.group.name),
 
         Status.NEW: {
             'perms': ['can_submit'],

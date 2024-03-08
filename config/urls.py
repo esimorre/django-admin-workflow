@@ -17,8 +17,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-admin.sites.site.site_title = "Django workflow admin"
-admin.sites.site.site_header = "Workflow démo"
+admin.sites.site.index_title = "Accueil"
+admin.sites.site.site_title = "Django workflow"
+admin.sites.site.site_header = "Workflow pour Django"
 
 urlpatterns = [
     path('', admin.site.urls),
