@@ -32,7 +32,7 @@ _access_rules_analysis = {
             'readonly_fields': ['contact', 'status'],
         },
 
-        #'filter': lambda q, space, user: q.filter(contact__user=user),
+        'filter': lambda q, user_space, user: q.filter(space=user_space.group.name),
 
         Status.NEW: {
             'perms': ['can_submit'],
