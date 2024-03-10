@@ -1,4 +1,4 @@
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -39,3 +39,17 @@ class Space(models.Model):
     objects = SpaceManager()
     class Meta:
         verbose_name = 'Partitionnement'
+
+class NotificationConfig(models.Model):
+    space = models.ForeignKey(Space, null=True, blank=True, on_delete=models.CASCADE)
+    status = models.CharField(max_length=40, default=_("all"))
+    role = models.ForeignKey(Group, null=True, blank=True, related_name='notifier_configs',
+                             on_delete=models.CASCADE)
+
+class UserSetting(models.Model):
+    user = models.OneToOneField(User, related_name='notif_config', on_delete=models.CASCADE)
+    active = models.BooleanField(default=True)
+    reactive_date = models.DateField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("Settings")

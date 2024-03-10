@@ -6,9 +6,11 @@ from django_admin_workflow.models import BaseStateModel
 # Etats
 class Status(models.TextChoices):
     NEW      = "n", "Nouveau"
+    SUBMIT   = "s", "Soumis"
     ACCEPTED = "a", "Accepté"
     VALID    = "v", "Validé"
     PUBLISH  = "p", "Publié"
+    CANCELED = "c", "Annulé"
 
 
 # classe de base pour le modèle et définition permission
@@ -40,7 +42,9 @@ _access_rules_analysis = {
             'perms': ['can_submit'],
             'fields': ['name', 'contact', 'status'],
             'readonly_fields': ['contact', 'status'],
-            'actions': [('submit', 'Modifier'), ('cancel', 'Annuler')],
+            'actions': [('save', 'Enregistrer'),
+                        ('submit', 'Soumettre', Status.SUBMIT),
+                        ('cancel', 'Annuler'), Status.CANCELED],
         },
     }
 }

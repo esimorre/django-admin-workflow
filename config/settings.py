@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'myapp',
+    'config_workflow',
     'django_admin_workflow',
     'django.contrib.admin',
     'django.contrib.auth',

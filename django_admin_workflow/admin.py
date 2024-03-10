@@ -1,4 +1,4 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.admin.models import LogEntry
 
 from .models import Space
@@ -31,12 +31,15 @@ class WorkflowModelAdmin(admin.ModelAdmin):
         return super().construct_change_message(request, form, formsets, add)
 
     def render_change_form(self, request, context, add=False, change=False, form_url="", obj=None):
+        if change:
+            self._add_action_buttons(request, obj.status, context)
         return super().render_change_form(request, context, add, change, form_url, obj)
 
     def save_model(self, request, obj, form, change):
         if not change:
             obj.creator = request.user.username
             obj.space = Space.objects.user_space_groupname(request.user)
+        self._change_state(request, obj)
         super().save_model(request, obj, form, change)
 
     def get_fields(self, request, obj=None):
@@ -76,7 +79,7 @@ class WorkflowModelAdmin(admin.ModelAdmin):
             if obj == None:
                 if 'creation' in rules:
                     rules = rules['creation']
-                    if access_type in rules:
+                    if rules and access_type in rules:
                         return rules[access_type]
             # modif
             else:
@@ -99,6 +102,32 @@ class WorkflowModelAdmin(admin.ModelAdmin):
             else:
                 _rules_session[req.session.session_key] = self.access_rules[groups[0].name]
         return _rules_session[req.session.session_key]
+
+    def _change_state(self, request, obj):
+        """
+        TODO ajout logentry
+        """
+        rules = self._get_access_rules(request)
+        if rules and obj.status in rules and 'actions' in rules[obj.status]:
+            actions = rules[obj.status]['actions']
+            for action in actions:
+                if len(action) < 3: continue
+                cmd = "_%s" % action[0]
+                if cmd in request.POST:
+                    if request.POST[cmd] == action[1]:
+                        obj.status = action[2]
+                        self.message_user(request, "change status TODO",
+                                          level=messages.WARNING, extra_tags='extra_tags')
+                        return
+
+    def _add_action_buttons(self, request, status, context):
+        """
+        TODO
+        """
+        rules = self._get_access_rules(request)
+        if rules and status in rules and 'actions' in rules[status]:
+            context['workflow_actions'] = rules[status]['actions']
+
 
 
 # cache
