@@ -38,10 +38,9 @@ class ConfigRoleStatusInline(FieldsInline):
 
 
 class ConfigRoleInline(admin.StackedInline):
-    template = "config_workflow/edit_inline/tabular.html"
     model = ConfigRole
     show_change_link = True
-    extra = 1
+    extra = 0
 
 
 @admin.register(ConfigWorkflow)

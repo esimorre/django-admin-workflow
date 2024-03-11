@@ -9,7 +9,7 @@ class Status(models.TextChoices):
 
 
 class BaseStateModel(models.Model):
-    status = models.CharField(max_length=1, choices=Status, default=Status.DRAFT)
+    status = models.SlugField(max_length=8, choices=Status, default="DRAFT")
     space = models.CharField(max_length=40, default='default', editable=False,
                              verbose_name=_("space"))
     creator = models.CharField(max_length=40, default='admin', editable=False,
@@ -17,8 +17,6 @@ class BaseStateModel(models.Model):
 
     class Meta:
         abstract = True
-        permissions = [("can_edit", _("Editor role")),
-                       ("can_publish", _("Publisher role")),]
 
 class SpaceManager(models.Manager):
     def user_space_groupname(self, user):
