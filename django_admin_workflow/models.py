@@ -27,7 +27,8 @@ class Space(models.Model):
         verbose_name = 'Partitionnement'
 
 class BaseStateModel(models.Model):
-    status = models.SlugField(max_length=8, choices=(("DRAFT", _("draft")),), default="DRAFT")
+    status_choices = (("DRAFT", _("draft")),)
+    status = models.SlugField(max_length=8, choices=status_choices, default="DRAFT")
     space = models.ForeignKey(Space, null=True, blank=True, on_delete=models.CASCADE,
                              verbose_name=_("space"))
     creator = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name=_("creator"))

@@ -5,7 +5,7 @@ from django_admin_workflow.models import BaseStateModel
 
 # Etats
 class MyStatus(models.TextChoices):
-    NEW      = "n", "Nouveau"
+    NEW      = "DRAFT", "Nouveau"
     SUBMIT   = "s", "Soumis"
     ACCEPTED = "a", "Accepté"
     VALID    = "v", "Validé"
@@ -15,7 +15,6 @@ class MyStatus(models.TextChoices):
 
 # classe de base pour le modèle et définition permission
 class State(BaseStateModel):
-
     class Meta:
         abstract = True
         permissions = [("can_submit", "Rôle demandeur"),
@@ -29,7 +28,7 @@ _access_rules_analysis = {
     'clients': {
 
         # partitionnement
-        'filter': lambda q, user_space, user: q.filter(space=user_space.group.name),
+        'filter': lambda q, user_space, user: q.filter(space=user_space),
 
         # accès des champs à la création
         'creation': {

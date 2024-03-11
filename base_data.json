@@ -598,7 +598,7 @@
     "name": "clients",
     "permissions": [
       1,
-      4
+      2
     ]
   }
 },
@@ -607,7 +607,7 @@
   "pk": 1,
   "fields": {
     "password": "pbkdf2_sha256$720000$dw4NfNQA6bwYJdAs4R86bs$oGyNE0P43T3RRBCptatpZmkq7ZRjex7HROQ4YbPp2iY=",
-    "last_login": "2024-03-11T09:33:22.912Z",
+    "last_login": "2024-03-11T11:30:55.078Z",
     "is_superuser": true,
     "username": "admin",
     "first_name": "",
@@ -625,7 +625,7 @@
   "pk": 2,
   "fields": {
     "password": "pbkdf2_sha256$720000$ccASizdi8IhxmdDSgJWvM6$csz2KEfXQN5cD7CprqrBBKtbt6gDte41S7vOBYnBU8E=",
-    "last_login": null,
+    "last_login": "2024-03-11T11:32:28.439Z",
     "is_superuser": false,
     "username": "client1",
     "first_name": "",
