@@ -1,7 +1,8 @@
 from django.contrib import admin, messages
 from django.contrib.admin.models import LogEntry
 
-from .models import Space, Status, ConfigRoleAdd, RoleStatusAction, ConfigRoleStatus, ConfigRole, ConfigWorkflow
+from .models import Space, Status, ConfigRoleAdd, RoleStatusAction, ConfigRoleStatus, ConfigRole, ConfigWorkflow, \
+    RolePermission
 
 
 @admin.register(Space)
@@ -138,6 +139,10 @@ _rules_session = {}
 @admin.register(Status)
 class StatusAdmin(admin.ModelAdmin):
     list_display = ('slug', 'verbose_name', 'ctype')
+
+@admin.register(RolePermission)
+class RolePermissionAdmin(admin.ModelAdmin):
+    list_display = ('slug', 'verbose_name', 'ctype', 'groups')
 
 
 class FieldsInline(admin.TabularInline):

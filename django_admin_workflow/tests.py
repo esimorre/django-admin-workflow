@@ -1,3 +1,7 @@
-from django.test import TestCase
+try:
+    from apptest.models import MyTestModel
+except RuntimeError:
+    print("Execute test with --settings django_admin_workflow.test.settings")
+    print("or add apptest in settings (maybe required in debug mode).")
 
-# Create your tests here.
+from .test.test_base import *

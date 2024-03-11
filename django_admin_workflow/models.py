@@ -86,6 +86,23 @@ class Status(models.Model):
         verbose_name = 'Status'
         verbose_name_plural = 'Status values'
 
+class RolePermission(Status):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        super().save(force_insert, force_update, using, update_fields)
+        Permission.objects.get_or_create(codename=self.slug, name=self.verbose_name,
+                                         content_type=self.ctype)
+
+    def groups(self):
+        perm = Permission.objects.get(codename=self.slug, name=self.verbose_name,
+                                         content_type=self.ctype)
+        return " , ".join([g.name for g in Group.objects.filter(permissions=perm)]) or "-"
+
+    def __str__(self):
+        return self.verbose_name
+
+    class Meta:
+        verbose_name = 'Role'
+
 
 class ConfigWorkflow(models.Model):
     label = models.CharField(max_length=40, default=_("main"))
