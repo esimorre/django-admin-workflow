@@ -4,7 +4,7 @@ from django_admin_workflow.admin import WorkflowModelAdmin
 from django_admin_workflow.models import BaseStateModel
 
 # Etats
-class Status(models.TextChoices):
+class MyStatus(models.TextChoices):
     NEW      = "n", "Nouveau"
     SUBMIT   = "s", "Soumis"
     ACCEPTED = "a", "Accepté"
@@ -15,7 +15,6 @@ class Status(models.TextChoices):
 
 # classe de base pour le modèle et définition permission
 class State(BaseStateModel):
-    status = models.CharField(max_length=1, choices=Status, default=Status.NEW)
 
     class Meta:
         abstract = True
@@ -38,13 +37,13 @@ _access_rules_analysis = {
             'readonly_fields': ['contact', 'status'],
         },
 
-        Status.NEW: {
+        MyStatus.NEW: {
             'perms': ['can_submit'],
             'fields': ['name', 'contact', 'status'],
             'readonly_fields': ['contact', 'status'],
             'actions': [('save', 'Enregistrer'),
-                        ('submit', 'Soumettre', Status.SUBMIT),
-                        ('cancel', 'Annuler'), Status.CANCELED],
+                        ('submit', 'Soumettre', MyStatus.SUBMIT),
+                        ('cancel', 'Annuler'), MyStatus.CANCELED],
         },
     }
 }

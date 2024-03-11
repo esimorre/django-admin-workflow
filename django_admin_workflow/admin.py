@@ -1,7 +1,7 @@
 from django.contrib import admin, messages
 from django.contrib.admin.models import LogEntry
 
-from .models import Space
+from .models import Space, Status, ConfigRoleAdd, RoleStatusAction, ConfigRoleStatus, ConfigRole, ConfigWorkflow
 
 
 @admin.register(Space)
@@ -37,8 +37,9 @@ class WorkflowModelAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         if not change:
-            obj.creator = request.user.username
-            obj.space = Space.objects.user_space_groupname(request.user)
+            if not request.user.is_superuser:
+                obj.creator = request.user
+            obj.space = Space.objects.get_for_user(obj.creator)
         self._change_state(request, obj)
         super().save_model(request, obj, form, change)
 
@@ -132,3 +133,75 @@ class WorkflowModelAdmin(admin.ModelAdmin):
 
 # cache
 _rules_session = {}
+
+
+@admin.register(Status)
+class StatusAdmin(admin.ModelAdmin):
+    list_display = ('slug', 'verbose_name', 'ctype')
+
+
+class FieldsInline(admin.TabularInline):
+    def get_formset(self, request, obj=None, **kwargs):
+        self._list_wfields = self._list_fields_workflow_model(obj)
+        formset = super().get_formset(request, obj, **kwargs)
+        return formset
+
+    def list_wfields(self):
+        return " , ".join(self._list_wfields)
+
+    def _list_fields_workflow_model(self, config_role_ob):
+        cls = config_role_ob.config.ctype.model_class()
+        fields = [f.attname for f in cls._meta.fields]
+        return fields
+
+class ConfigRoleAddInline(FieldsInline):
+    template = "django_admin_workflow/edit_inline/tabular.html"
+    model = ConfigRoleAdd
+    extra = 1
+
+class RoleStatusActionInline(admin.TabularInline):
+    model = RoleStatusAction
+    extra = 1
+
+class ConfigRoleStatusInline(FieldsInline):
+    template = "django_admin_workflow/edit_inline/tabular.html"
+    model = ConfigRoleStatus
+    show_change_link = True
+    extra = 1
+
+
+class ConfigRoleInline(admin.StackedInline):
+    model = ConfigRole
+    show_change_link = True
+    extra = 0
+
+
+@admin.register(ConfigWorkflow)
+class ConfigWorkflowAdmin(admin.ModelAdmin):
+    inlines = [ConfigRoleInline]
+    list_display = ('label', 'ctype')
+
+    def get_queryset(self, request):
+        return super().get_queryset(request)
+
+
+@admin.register(ConfigRole)
+class ConfigRoleAdmin(admin.ModelAdmin):
+    inlines = [ConfigRoleAddInline, ConfigRoleStatusInline]
+    list_display = ('role', 'config')
+    fields = (('role', 'config'), ('filter_space', 'filter_user'))
+    readonly_fields = ('role', 'config')
+
+    def has_add_permission(self, request):
+        return False
+
+
+@admin.register(ConfigRoleStatus)
+class ConfigRoleStatusAdmin(admin.ModelAdmin):
+    inlines = [RoleStatusActionInline]
+    list_display = ('status', 'config_role', 'workflow_name')
+    fields = (('config_role', 'status', 'permission'), 'edit_fields', 'readonly_fields')
+    readonly_fields = ('config_role', 'status', 'permission')
+
+    def has_add_permission(self, request):
+        return False
