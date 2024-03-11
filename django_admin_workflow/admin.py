@@ -128,7 +128,8 @@ class WorkflowModelAdmin(admin.ModelAdmin):
         """
         rules = self._get_access_rules(request)
         if rules and status in rules and 'actions' in rules[status]:
-            context['workflow_actions'] = rules[status]['actions']
+            data = [(t[0], t[1]) for t in rules[status]['actions'] ]
+            context['workflow_actions'] = data
 
 
 

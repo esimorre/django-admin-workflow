@@ -24,7 +24,7 @@ class Space(models.Model):
 
     objects = SpaceManager()
     class Meta:
-        verbose_name = 'Partitionnement'
+        verbose_name = 'Espace'
 
 class BaseStateModel(models.Model):
     status_choices = (("DRAFT", _("draft")),)

@@ -1,7 +1,11 @@
 {% load i18n admin_urls %}
 <div class="submit-row">
 {% block submit-row %}
-    <input type="submit" value="TODO Workflow" class="default" name="_todo">
+    {% for action in workflow_actions %}
+    <input type="submit" value="{{ action|last }}"
+           {% if forloop.first %} class="default" {% endif %}
+           name="_{{ action|first }}">
+    {% endfor %}
 {% if show_save %}<input type="submit" value="TODO Workflow" class="default" name="_save">{% endif %}
 {% if show_close %}
     {% url opts|admin_urlname:'changelist' as changelist_url %}

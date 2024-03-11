@@ -42,7 +42,7 @@ _access_rules_analysis = {
             'readonly_fields': ['contact', 'status'],
             'actions': [('save', 'Enregistrer'),
                         ('submit', 'Soumettre', MyStatus.SUBMIT),
-                        ('cancel', 'Annuler'), MyStatus.CANCELED],
+                        ('cancel', 'Annuler', MyStatus.CANCELED)],
         },
     }
 }

@@ -1,0 +1,45 @@
+{% extends "admin/index.html" %}
+{% load i18n %}
+
+{% block bodyclass %}{{ block.super }} app-{{ app_label }}{% endblock %}
+
+
+{% block content %}
+
+<div class="module">
+  <h3>Partitionnement des données</h3>
+  <p>Créer des <a href="space">espaces</a> qui ne sont autres que des groupes spécifiques
+  d'utilisateurs permettant de cloisonner les données dans le contexte des objets de workflow.</p>
+
+
+  <h3>Paramétrage d'un workflow</h3>
+  <p>Créer un <a href="configworkflow">workflow</a> pour lequel vous sélectionnerez un modèle
+    basé sur "BaseStateModel" (cf. appli apptest, ce modèle abstrait contient le status courant,
+    l'espace de partition et le créateur d'un objet). Vous pourrez initialiser ici les configurations
+    pour chaque rôle (groupe std) intervenant dans le workflow.
+  </p>
+  <p>Créer un <a href="status">statut</a> pour chaque état dans lequel peuvent se trouver vos modèles. Les statuts
+  sont communs à tous les worflows</p>
+  <p>Créer une <a href="rolepermission">configuration de rôle</a> pour chaque groupe/rôle du workflow, on
+  associe ici un groupe d'utilisateur avec un rôle fonctionnel sur un type d'objet de workflow.</p>
+</div>
+
+<h3>Accès direct au paramétrage de workflows:</h3>
+{{ block.super }}
+{% endblock %}
+
+
+{% if not is_popup %}
+{% block nav-breadcrumbs %}
+  <nav aria-label="{% translate 'Breadcrumbs' %}">
+    <div class="breadcrumbs">
+      <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+      &rsaquo;
+      {% for app in app_list %}
+        {{ app.name }}
+      {% endfor %}
+    </div>
+  </nav>
+{% endblock %}
+{% endif %}
+
