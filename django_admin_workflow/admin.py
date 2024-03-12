@@ -157,7 +157,12 @@ class FieldsInline(admin.TabularInline):
 
     def _list_fields_workflow_model(self, config_role_ob):
         cls = config_role_ob.config.ctype.model_class()
-        fields = [f.attname for f in cls._meta.fields]
+        fields = []
+        for f in [f.attname for f in cls._meta.fields]:
+            if f in ('pk', 'id'): continue
+            f = f.replace('_id', '')
+            fields.append(f)
+
         return fields
 
 class ConfigRoleAddInline(FieldsInline):

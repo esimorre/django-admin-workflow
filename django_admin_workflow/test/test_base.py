@@ -7,9 +7,10 @@ from .helpers import *
 
 
 class BasicTestCase(TestCase):
-    def setUp(self):
-        create_partition("Dep1", users=('cli1', 'cli1b'), role_add='clients')
-        create_partition("Dep2", users=('cli2', 'cli2b'), role_add='clients')
+    @classmethod
+    def setUpTestData(cls):
+        create_space("Dep1", users=('cli1', 'cli1b'), role_add='clients')
+        create_space("Dep2", users=('cli2', 'cli2b'), role_add='clients')
 
     def test1_init(self):
         self.assertEqual(User.objects.get(username='cli1').groups.all()[0].name, 'Dep1')
