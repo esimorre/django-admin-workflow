@@ -45,12 +45,11 @@ class WorkflowModelAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
     def get_fields(self, request, obj=None):
-        return self._get_fields_common('fields',
+        fields = self._get_fields_common('fields',
                                        request, obj) or super().get_fields(request, obj)
-
-    def get_readonly_fields(self, request, obj=None):
-        return self._get_fields_common('readonly_fields',
-                                       request, obj) or super().get_readonly_fields(request, obj)
+        if not request.user.is_superuser:
+            if 'status' in fields: fields.remove('status')
+        return fields
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -139,11 +138,11 @@ _rules_session = {}
 
 @admin.register(Status)
 class StatusAdmin(admin.ModelAdmin):
-    list_display = ('slug', 'verbose_name', 'ctype')
+    list_display = ('color_display', 'slug',)
 
 @admin.register(RolePermission)
 class RolePermissionAdmin(admin.ModelAdmin):
-    list_display = ('slug', 'verbose_name', 'ctype', 'groups')
+    list_display = ('color_display', 'slug', 'ctype', 'groups')
 
 
 class FieldsInline(admin.TabularInline):

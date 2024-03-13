@@ -2,6 +2,7 @@ from django.contrib.auth.models import Group, User, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import Q
+from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
 class SpaceManager(models.Manager):
@@ -27,8 +28,7 @@ class Space(models.Model):
         verbose_name = 'Espace'
 
 class BaseStateModel(models.Model):
-    status_choices = (("DRAFT", _("draft")),)
-    status = models.SlugField(max_length=8, choices=status_choices, default="DRAFT")
+    status = models.SlugField(max_length=8, default="DRAFT")
     space = models.ForeignKey(Space, null=True, blank=True, on_delete=models.CASCADE,
                              verbose_name=_("space"))
     creator = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name=_("creator"))
@@ -72,21 +72,31 @@ def _get_workflow_permissions():
             ~Q(codename__startswith='change_') &
             ~Q(codename__startswith='view_') &
             ~Q(codename__startswith='delete_'))
-class Status(models.Model):
-    ctype = models.ForeignKey(ContentType, on_delete=models.CASCADE,
-                              limit_choices_to=_get_workflow_contenttypes)
+
+class RoleStatusMixin(models.Model):
     slug = models.SlugField(max_length=8)
     verbose_name = models.CharField(max_length=40)
     bgcolor = models.CharField(max_length=20, null=True, blank=True)
 
+    def color_display(self):
+        tpl = '<span class="button" style="background:%s"> %s </span>'
+        return format_html(tpl % (self.bgcolor, self.verbose_name))
+    color_display.short_description = _("Color")
+
     def __str__(self):
         return self.verbose_name
+    class Meta:
+        abstract = True
 
+class Status(RoleStatusMixin):
     class Meta:
         verbose_name = 'Status'
         verbose_name_plural = 'Status values'
 
-class RolePermission(Status):
+class RolePermission(RoleStatusMixin):
+    ctype = models.ForeignKey(ContentType, on_delete=models.CASCADE,
+                              limit_choices_to=_get_workflow_contenttypes)
+
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         super().save(force_insert, force_update, using, update_fields)
         Permission.objects.get_or_create(codename=self.slug, name=self.verbose_name,
@@ -96,9 +106,6 @@ class RolePermission(Status):
         perm = Permission.objects.get(codename=self.slug, name=self.verbose_name,
                                          content_type=self.ctype)
         return " , ".join([g.name for g in Group.objects.filter(permissions=perm)]) or "-"
-
-    def __str__(self):
-        return self.verbose_name
 
     class Meta:
         verbose_name = 'Role'

@@ -1,7 +1,19 @@
 import os.path
 
-def get_workflow_data(caller_file, file_data="workflow.py"):
-    dic = None
-    with open(os.path.join(os.path.dirname(caller_file), file_data), "r", encoding="utf-8") as f:
-        dic = eval(f.read())
+import tomli
+
+
+def get_workflow_data(caller_file, file_data="workflow.toml"):
+    dic = {}
+    if file_data.endswith(".py"):
+        with open(os.path.join(os.path.dirname(caller_file), file_data), "r", encoding="utf-8") as f:
+            dic = eval(f.read())
+    elif file_data.endswith(".toml"):
+        with open(os.path.join(os.path.dirname(caller_file), file_data), "rb") as f:
+            dic = tomli.load(f)
+        for data in dic.values():
+            if 'filter' in data and data['filter'].strip().startswith("lambda"):
+                data['filter'] = eval(data['filter'])
+    else:
+        raise Exception("format file not supported")
     return dic
