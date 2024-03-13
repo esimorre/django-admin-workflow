@@ -11,16 +11,24 @@
 
 
   <h3>Paramétrage d'un workflow</h3>
-  <p>Créer un <a href="configworkflow">workflow</a> pour lequel vous sélectionnerez un modèle
-    basé sur "BaseStateModel" (cf. appli apptest, ce modèle abstrait contient le status courant,
-    l'espace de partition et le créateur d'un objet). Vous pourrez initialiser ici les configurations
-    pour chaque rôle (groupe std) intervenant dans le workflow.
-  </p>
-  <p>Créer un <a href="status">statut</a> pour chaque état dans lequel peuvent se trouver vos modèles. Les statuts
-  sont communs à tous les worflows</p>
-  <p>Créer une <a href="rolepermission">configuration de rôle</a> pour chaque groupe/rôle du workflow, on
-  associe ici un groupe d'utilisateur avec un rôle fonctionnel sur un type d'objet de workflow.</p>
+  <p>Créer un workflow par import d'un fichier au format .toml. Les commandes
+    django-admin suivantes sont utilisées ainsi (elles sont auto-documentées et assistent l'opération):
 
+    <pre>add_sample : </pre> crée des données Espace, utilisateurs facilitant les tests
+    <pre>gen_workflow_template : </pre> génère un fichier patron au format .toml qui spécifie
+    entièrement le workflow. Ce patron sera d'autant plus précis que vous aurez auparavant créé et/ou
+    mentionné le modèle django de votre workflow (basé sur BaseStateModel au lieu de models.Model)
+    <pre>import_workflow : </pre> Cette commande analyse votre fichier workflow et créé les objets
+    en base Status, configurations de rôle, permissions, qui pourront être personnalisées depuis
+    l'interface admin (voir ci-dessous) comme les couleurs et labels des statuts et des boutons action
+
+  </p>
+  <p>Modifier le <a href="status">statut</a> de chaque état dans lequel peut se trouver vos modèles. Les statuts
+  sont communs à tous les worflows, ils sont automatiquement créés lors de l'import du workflow</p>
+  <p>Modifier la <a href="rolepermission">configuration de rôle</a> pour chaque rôle du workflow, ces rôles sont  automatiquement créés lors
+    de l'import du workflow.</p>
+
+  <p><a href="{% url 'workflow' %}">Workflow definition</a></p>
   <h1>Accès direct au paramétrage de workflows</h1>
 
 </div>

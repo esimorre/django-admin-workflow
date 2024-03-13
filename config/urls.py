@@ -15,13 +15,16 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+
+from django_admin_workflow.views import WorkflowPageView
 
 admin.sites.site.index_title = "Accueil"
 admin.sites.site.site_title = "Django workflow"
 admin.sites.site.site_header = "Workflow pour Django"
 
 urlpatterns = [
+    path("workflow/", WorkflowPageView.as_view(),
+         {'workflow':"apptest/workflow.toml"}, name='workflow'),
     path('', admin.site.urls),
-    #path('admin/', admin.site.urls),
 ]

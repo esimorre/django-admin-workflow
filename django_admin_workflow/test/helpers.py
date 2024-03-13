@@ -14,7 +14,7 @@ def create_users(users, space, group_add=None):
     """
     Space.objects.get_or_create(label=space)
     for u in users:
-        obu = User.objects.create_user(u, password=u)
+        obu = User.objects.create_user(u, password=u, is_staff=True)
         obu.groups.add(Group.objects.get_or_create(name=space)[0])
         if group_add:
             obu.groups.add(Group.objects.get_or_create(name=group_add)[0])

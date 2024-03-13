@@ -1,0 +1,25 @@
+{% extends "admin/index.html" %}
+{% load i18n %}
+
+{% block coltype %}colMS{% endblock %}
+{% if not is_popup %}
+{% block nav-breadcrumbs %}
+  <nav aria-label="{% translate 'Breadcrumbs' %}">
+    <div class="breadcrumbs">
+      <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+      &rsaquo;
+      {% translate 'Workflow definition' %}
+    </div>
+  </nav>
+{% endblock %}
+{% endif %}
+
+{% block sidebar %}<a href="{% url 'admin:index' %}django_admin_workflow">Workflow configuration</a>{% endblock %}
+{% block content %}
+<div id="content-main">
+    <pre>{{ body_toml }}</pre>
+</div>
+{% endblock %}
+
+
+{% block footer %}<div id="footer">Workflow pour django admin</div>{% endblock %}
