@@ -9,8 +9,8 @@ from .helpers import *
 class BasicTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        create_space("Dep1", users=('cli1', 'cli1b'), role_add='clients')
-        create_space("Dep2", users=('cli2', 'cli2b'), role_add='clients')
+        create_users(users=('cli1', 'cli1b'), space="Dep1", group_add='clients')
+        create_users(users=('cli2', 'cli2b'), space="Dep2", group_add='clients')
 
     def test1_init(self):
         self.assertEqual(User.objects.get(username='cli1').groups.all()[0].name, 'Dep1')

@@ -3,9 +3,7 @@
 
 {% block bodyclass %}{{ block.super }} app-{{ app_label }}{% endblock %}
 
-
-{% block content %}
-
+{% block content-desc %}
 <div class="module">
   <h3>Partitionnement des données</h3>
   <p>Créer des <a href="space">espaces</a> qui ne sont autres que des groupes spécifiques
@@ -22,10 +20,11 @@
   sont communs à tous les worflows</p>
   <p>Créer une <a href="rolepermission">configuration de rôle</a> pour chaque groupe/rôle du workflow, on
   associe ici un groupe d'utilisateur avec un rôle fonctionnel sur un type d'objet de workflow.</p>
+
+  <h1>Accès direct au paramétrage de workflows</h1>
+
 </div>
 
-<h3>Accès direct au paramétrage de workflows:</h3>
-{{ block.super }}
 {% endblock %}
 
 
