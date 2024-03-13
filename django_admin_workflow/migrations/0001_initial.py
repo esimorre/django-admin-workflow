@@ -61,7 +61,7 @@ class Migration(migrations.Migration):
                 ('edit_fields', models.CharField(blank=True, max_length=80, null=True)),
                 ('readonly_fields', models.CharField(blank=True, max_length=80, null=True)),
                 ('config_role', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='status_configs', to='django_admin_workflow.configrole')),
-                ('permission', models.ForeignKey(limit_choices_to=django_admin_workflow.models._get_workflow_permissions, on_delete=django.db.models.deletion.CASCADE, to='auth.permission')),
+                ('permission', models.ForeignKey(limit_choices_to=django_admin_workflow.models.get_workflow_permissions, on_delete=django.db.models.deletion.CASCADE, to='auth.permission')),
                 ('status', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='django_admin_workflow.status')),
             ],
             options={
@@ -73,7 +73,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('label', models.CharField(default='main', max_length=40)),
-                ('ctype', models.ForeignKey(limit_choices_to=django_admin_workflow.models._get_workflow_contenttypes, on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype')),
+                ('ctype', models.ForeignKey(limit_choices_to=django_admin_workflow.models.get_workflow_contenttypes, on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype')),
             ],
             options={
                 'verbose_name': 'Workflow',
@@ -91,7 +91,7 @@ class Migration(migrations.Migration):
                 ('slug', models.SlugField(max_length=8)),
                 ('verbose_name', models.CharField(max_length=40)),
                 ('bgcolor', models.CharField(blank=True, max_length=20, null=True)),
-                ('ctype', models.ForeignKey(limit_choices_to=django_admin_workflow.models._get_workflow_contenttypes, on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype')),
+                ('ctype', models.ForeignKey(limit_choices_to=django_admin_workflow.models.get_workflow_contenttypes, on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype')),
             ],
             options={
                 'verbose_name': 'Role',
