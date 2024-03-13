@@ -1,5 +1,7 @@
 from django.core.management import BaseCommand
 
+from django_admin_workflow.test import create_data
+
 
 class Command(BaseCommand):
     help = "Populate database with some sample data"
@@ -9,10 +11,11 @@ class Command(BaseCommand):
             **kwargs)
 
     def add_arguments(self, parser):
-        parser.add_argument("-a", "--admin", default="admin", metavar="[user_name] [passwd]",
+        parser.add_argument("-a", "--admin", default=[], metavar="[user_name] [passwd]",
+                            nargs="*", action="append",
                             required=False, help="add a superuser (defaults: admin admin)")
         parser.add_argument("--dry-run", action='store_true',
                             required=False, help="don't actually write in db.")
 
-    def handle(self, *args, **options):
-        print("TODO")
+    def handle(self, admin, dry_run=False, *args, **options):
+        create_data(create_su=len(admin) > 0, dry_run=dry_run)

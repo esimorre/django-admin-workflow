@@ -22,4 +22,4 @@ class Command(BaseCommand):
                             required=False, help="generate a workflow model template.")
 
     def handle(self, workflow_file, dry_run=False, *args, **options):
-        print("dry_run ", dry_run)
+        if dry_run: print("-------- DRY-RUN ---------")
