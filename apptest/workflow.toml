@@ -9,12 +9,9 @@
 
     # Etat DRAFT
     [clients.DRAFT]
-    perms = ["can_submit"]
     fields =  ['name', 'contact', 'status']
     readonly_fields = ['contact', 'status']
     actions = [ ["save",     "Enregistrer"],
-                ["submit",   "Soumettre", "submited"],
-                ["submit",   "Soumettre", "accepted"],
-                ["validate", "Valider",   "valid"],
-                ["cancel",   "Annuler",   "canceled"]]
+                ["can_submit",   "Soumettre", "submited"],
+                ["can_cancel",   "Annuler",   "canceled"]]
 

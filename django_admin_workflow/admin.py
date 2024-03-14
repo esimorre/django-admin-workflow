@@ -2,6 +2,7 @@ from django.contrib import admin, messages
 from django.contrib.admin.models import LogEntry
 
 from .models import Space, Status, RolePermission
+from django.utils.translation import gettext_lazy as _
 
 
 @admin.register(Space)
@@ -21,14 +22,21 @@ class LogEntry(admin.ModelAdmin):
 class WorkflowModelAdmin(admin.ModelAdmin):
     access_rules = {}
     change_form_template = 'django_admin_workflow/change_form.html'
+
+    def message_user(self, request, message, level=messages.INFO, extra_tags="", fail_silently=False):
+        if self._invalid_save_flag: return
+        return super().message_user(request, message, level, extra_tags, fail_silently)
+
+    def save_related(self, request, form, formsets, change):
+        if self._invalid_save_flag: return
+        super().save_related(request, form, formsets, change)
+
     def log_change(self, request, obj, message):
+        if self._invalid_save_flag: return
         return super().log_change(request, obj, message)
 
     def response_change(self, request, obj):
         return super().response_change(request, obj)
-
-    def construct_change_message(self, request, form, formsets, add=False):
-        return super().construct_change_message(request, form, formsets, add)
 
     def render_change_form(self, request, context, add=False, change=False, form_url="", obj=None):
         if change:
@@ -40,8 +48,17 @@ class WorkflowModelAdmin(admin.ModelAdmin):
             if not request.user.is_superuser:
                 obj.creator = request.user
             obj.space = Space.objects.get_for_user(obj.creator)
-        self._change_state(request, obj)
-        super().save_model(request, obj, form, change)
+        prev_status = obj.status
+        status_change, had_access = self._change_state(request, obj)
+        self._invalid_save_flag = False
+        if had_access:
+            if not status_change or obj.on_before_change_status(prev_status=prev_status):
+                super().save_model(request, obj, form, change)
+                obj.on_after_change_status(prev_status=prev_status)
+        else:
+            self.message_user(request, _("Something went wrong, action was not successful :-(. Please reload page ..." ),
+                              level=messages.ERROR)
+            self._invalid_save_flag = True
 
     def get_fields(self, request, obj=None):
         fields = self._get_fields_common('fields',
@@ -63,6 +80,12 @@ class WorkflowModelAdmin(admin.ModelAdmin):
                     space = Space.objects.get_for_user(request.user)
                     return lambfunc(qs, space, request.user)
         return qs
+
+    def has_user_access(self, request, rules, status):
+        """
+        check status with user rights
+        """
+        return rules and status in rules and 'actions' in rules[status]
 
     def _get_fields_common(self, access_type, request, obj=None):
         """
@@ -107,28 +130,31 @@ class WorkflowModelAdmin(admin.ModelAdmin):
         """
         TODO ajout logentry
         """
+        status_change, had_access = False, request.user.is_superuser
         rules = self._get_access_rules(request)
-        if rules and obj.status in rules and 'actions' in rules[obj.status]:
+        if self.has_user_access(request, rules, obj.status):
+            had_access =True
             actions = rules[obj.status]['actions']
             for action in actions:
                 if len(action) < 3: continue
                 cmd = "_%s" % action[0]
                 if cmd in request.POST:
-                    if request.POST[cmd] == action[1]:
+                    if request.POST[cmd] == action[1] and obj.status != action[2]:
+                        status_change = True
                         obj.status = action[2]
                         self.message_user(request, "change status TODO",
                                           level=messages.WARNING, extra_tags='extra_tags')
-                        return
+                        break
+        return status_change, had_access
 
     def _add_action_buttons(self, request, status, context):
         """
         TODO
         """
         rules = self._get_access_rules(request)
-        if rules and status in rules and 'actions' in rules[status]:
+        if self.has_user_access(request, rules, status):
             data = [(t[0], t[1]) for t in rules[status]['actions'] ]
             context['workflow_actions'] = data
-
 
 
 # cache

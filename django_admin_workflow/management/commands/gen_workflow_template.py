@@ -1,8 +1,5 @@
-from django.contrib.contenttypes.models import ContentType
 from django.core.management import BaseCommand
-
-from django_admin_workflow.management.commands._private import get_target_ctype, list_fields_model
-from django_admin_workflow.models import get_workflow_contenttypes
+from django_admin_workflow.management.commands._private import get_target_ctype, get_fields_model
 
 _template = """
 [GROUP_NAME]
@@ -11,25 +8,24 @@ _template = """
 
     # fields access on creation
     [GROUP_NAME.creation]
-    fields =  [FIELDS_LIST] # ALLFIELDS
+    fields =  [FIELDS_LIST] # Select values from these: ALLFIELDS
     readonly_fields = [FIELDS_LIST]
 
     # The 'DRAFT' status is the default for all workflow models
     [GROUP_NAME.DRAFT]
     perms = [PERMISSION_LIST]
-    fields =  [FIELDS_LIST] # ALLFIELDS
+    fields =  [FIELDS_LIST] # Select values from these: ALLFIELDS
     readonly_fields = [FIELDS_LIST]
     actions = [ [ACTION_CODE,    ACTION_VERBOSE],
                 [ACTION_CODE2,   ACTION_VERBOSE2,   STATUS_TARGET]]
 
 #### Add others status. This is an example for the DRAFT status
 #    [clients.DRAFT]
-#    perms = ["can_submit"]
 #    fields =  ['name', 'contact', 'status']
 #    readonly_fields = ['status']
-#    actions = [ ["save",     "Save"],
-#                ["submit",   "Submit", "submited"],
-#                ["cancel",   "Cancel",   "canceled"]]
+#    actions = [ ["save",       "Save"],
+#                ["can_submit", "Submit", "submited"],
+#                ["can_cancel",     "Cancel", "canceled"]]
 
 #### Add others [GROUP_NAME] sections
 """
@@ -42,17 +38,15 @@ class Command(BaseCommand):
     help = "Generate a .toml workflow template file on stdout"
     def create_parser(self, prog_name, subcommand, **kwargs):
         return super().create_parser(prog_name, subcommand,
-            usage="%(prog)s [-m app_label.model_name] [-t] [options] [ > workflow.toml ]",
+            usage="%(prog)s [-m app_label.model_name] [options] [ > workflow.toml ]",
             **kwargs)
 
     def add_arguments(self, parser):
         parser.add_argument("-m", "--model", metavar="app_label.model", nargs=1,
-                            required=False, help="workflow model (based on BaseStateModel)")
-        parser.add_argument("-t", "--model-template", action='store_true',
-                        required=False, help="generate a workflow model template.")
+                            required=False, help="workflow model based on BaseStateModel or not yet. If it is,\
+                and is unique, this can be detected.")
 
-
-    def handle(self, model, model_template,  *args, **options):
+    def handle(self, model,  *args, **options):
         msg = """
 # 1. Put this in a file ie. named 'workflow.toml' in your app directory
 # 2. Edit this file with real values
@@ -68,7 +62,7 @@ class Command(BaseCommand):
             self.stderr.write("The workflow model is %s.%s" % ctype.natural_key(), ending='\n')
             # test if workflow model
             if not wf_ready:
-                fields = list_fields_model(ctype)
+                fields = get_fields_model(ctype)
                 text = _template.replace("ALLFIELDS", fields)
                 print(text)
                 self.stderr.write("The model mentioned is not yet ready for workflow", ending='\n')
@@ -80,10 +74,9 @@ class Command(BaseCommand):
                 return
 
         if ctype:
-            fields = list_fields_model(ctype)
+            fields = get_fields_model(ctype)
             text = _template.replace("ALLFIELDS", fields)
             print (text)
-            self.stderr.write(fields, ending='\n')
         else:
             # no model found
             text = _template.replace("# ALLFIELDS", "")

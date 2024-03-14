@@ -18,11 +18,12 @@ def get_target_ctype(app_model):
             wf_ready = True
     return ctype, wf_ready, explicit, len(ctypes)
 
-def list_fields_model(ctype):
+def get_fields_model(ctype, joined=" , "):
     cls = ctype.model_class()
-    fields = []
-    for f in [f.attname for f in cls._meta.fields]:
+    fields = set()
+    for f in [ff.attname for ff in cls._meta.fields]:
         if f in ('pk', 'id'): continue
-        f = f.replace('_id', '')
-        fields.append(f)
-    return " , ".join(["'%s'" % f for f in fields])
+        fv = f.replace('_id', '')
+        fields.add(fv)
+    if not joined: return fields
+    return joined.join(["'%s'" % f for f in fields])

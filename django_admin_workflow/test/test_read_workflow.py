@@ -23,7 +23,6 @@ class ReadWorkflow(TestCase):
             for key, content in data.items():
                 if key in ('filter', 'creation'): continue
                 status.append(key)
-                perms.extend(content['perms'])
                 for action in content['actions']:
                     if len(action) > 2: status.append(action[2])
 

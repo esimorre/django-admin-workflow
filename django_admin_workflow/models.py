@@ -7,6 +7,7 @@ from django.utils.translation import gettext_lazy as _
 
 class SpaceManager(models.Manager):
     def get_for_user(self, user):
+        if user.is_superuser: return None
         return self.get(group__in=user.groups.all())
 
 class Space(models.Model):
@@ -28,10 +29,28 @@ class Space(models.Model):
         verbose_name = 'Espace'
 
 class BaseStateModel(models.Model):
-    status = models.SlugField(max_length=8, default="DRAFT")
+    status = models.SlugField(max_length=20, default="DRAFT")
     space = models.ForeignKey(Space, null=True, blank=True, on_delete=models.CASCADE,
                              verbose_name=_("space"))
     creator = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name=_("creator"))
+
+    def on_before_change_status(self, prev_status):
+        """
+        Event before saving workflow model. Can be overriden to implement guard
+
+        :prev_status:   previous status
+        :return: True for validate saving
+        """
+        return True
+
+    def on_after_change_status(self, prev_status):
+        """
+        Event before saving workflow model. Can be overriden to implement automatic activity
+
+        :prev_status:   previous status
+        :return: True for validate saving
+        """
+        pass
 
     class Meta:
         abstract = True
@@ -75,9 +94,9 @@ def get_workflow_permissions():
             ~Q(codename__startswith='delete_'))
 
 class RoleStatusMixin(models.Model):
-    slug = models.SlugField(max_length=8)
+    slug = models.SlugField(max_length=20)
     verbose_name = models.CharField(max_length=40)
-    bgcolor = models.CharField(max_length=20, null=True, blank=True)
+    bgcolor = models.CharField(max_length=20, default="LightGray")
 
     def color_display(self):
         tpl = '<span class="button" style="background:%s"> %s </span>'
