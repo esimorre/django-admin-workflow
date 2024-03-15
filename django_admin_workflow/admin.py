@@ -26,6 +26,8 @@ class WorkflowModelAdmin(admin.ModelAdmin):
         if not request.user.is_superuser:
             if 'space' in list_display: list_display.remove('space')
             if 'creator' in list_display: list_display.remove('creator')
+        if 'status' in list_display:
+            list_display = [f if f != 'status' else 'status_label' for f in list_display]
         return list_display
 
     def get_list_filter(self, request):

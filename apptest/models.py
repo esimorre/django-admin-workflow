@@ -9,3 +9,6 @@ class MyTestModel(BaseStateModel):
     contact = models.EmailField(blank=True, null=True)
     duration = models.DurationField(blank=True, null=True)
     value = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
+
+    def __str__(self):
+        return self.name

@@ -1,12 +1,11 @@
 from django.contrib.auth.models import Permission
-from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from apptest.models import MyTestModel
 
 from .helpers import *
 
 
-class BasicTestCase(TestCase):
+class BasicTestCase(WorkflowTestCase):
     @classmethod
     def setUpTestData(cls):
         create_users(users=('cli1', 'cli1b'), space="Dep1", group_add='clients')

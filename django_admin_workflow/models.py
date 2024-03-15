@@ -98,9 +98,11 @@ def get_workflow_permissions():
             ~Q(codename__startswith='delete_'))
 
 class RoleStatusMixin(models.Model):
-    slug = models.SlugField(max_length=20, verbose_name=_("slug"))
+    slug = models.SlugField(max_length=20, verbose_name=_("token"))
     verbose_name = models.CharField(max_length=40, verbose_name="label")
-    bgcolor = models.CharField(max_length=20, default="LightGray", verbose_name=_("bcolor"))
+    bgcolor = models.CharField(max_length=20, default="LightGray",
+                               verbose_name=_("color"),
+                               help_text=_("HTML standard color name or #......"))
 
     def color_display(self):
         tpl = '<span class="button" style="background:%s"> %s </span>'

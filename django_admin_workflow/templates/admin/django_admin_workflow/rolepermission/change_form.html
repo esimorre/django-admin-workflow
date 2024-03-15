@@ -1,0 +1,9 @@
+{% extends "admin/change_form.html" %}
+
+{% block after_field_sets %}
+<p>L'attribution d'un rôle à un groupe d'utilisateurs se fait en attribuant la permission
+correspondante<br/>
+    ici <b>[{{ original.ctype }} : {{ original.verbose_name }}]</b> au groupe d'utilisateurs.</p>
+{% endblock %}
+
+
