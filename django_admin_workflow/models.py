@@ -18,7 +18,7 @@ class Space(models.Model):
 
     label = models.CharField(max_length=40, null=True, blank=True)
     group = models.ForeignKey(Group, null=True, blank=True, related_name='workspaces',
-                              verbose_name='groupe associé', on_delete=models.CASCADE,
+                              verbose_name=_("linked group"), on_delete=models.CASCADE,
                               help_text="laisser vide sauf cas spécifique")
 
     def __str__(self):
@@ -51,6 +51,10 @@ class BaseStateModel(models.Model):
         :return: True for validate saving
         """
         pass
+
+    def status_label(self):
+        return Status.objects.get(slug=self.status).verbose_name
+    status_label.short_description = _("status")
 
     class Meta:
         abstract = True
@@ -94,9 +98,9 @@ def get_workflow_permissions():
             ~Q(codename__startswith='delete_'))
 
 class RoleStatusMixin(models.Model):
-    slug = models.SlugField(max_length=20)
-    verbose_name = models.CharField(max_length=40)
-    bgcolor = models.CharField(max_length=20, default="LightGray")
+    slug = models.SlugField(max_length=20, verbose_name=_("slug"))
+    verbose_name = models.CharField(max_length=40, verbose_name="label")
+    bgcolor = models.CharField(max_length=20, default="LightGray", verbose_name=_("bcolor"))
 
     def color_display(self):
         tpl = '<span class="button" style="background:%s"> %s </span>'
@@ -115,11 +119,15 @@ class Status(RoleStatusMixin):
 
 class RolePermission(RoleStatusMixin):
     ctype = models.ForeignKey(ContentType, on_delete=models.CASCADE,
+                              verbose_name=_("workflow model"),
                               limit_choices_to=get_workflow_contenttypes)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         super().save(force_insert, force_update, using, update_fields)
-        Permission.objects.get_or_create(codename=self.slug, name=self.verbose_name,
+        self.get_or_create_permission()
+
+    def get_or_create_permission(self):
+        return Permission.objects.get_or_create(codename=self.slug, name=self.verbose_name,
                                          content_type=self.ctype)
 
     def groups(self):

@@ -1,5 +1,6 @@
 from django.contrib import admin, messages
 from django.contrib.admin.models import LogEntry
+from django.utils.html import format_html
 
 from .models import Space, Status, RolePermission
 from django.utils.translation import gettext_lazy as _
@@ -20,6 +21,20 @@ class LogEntry(admin.ModelAdmin):
 
 # Gestionnaire des vues admin respectant les règles groupe/permissions/champs exposés
 class WorkflowModelAdmin(admin.ModelAdmin):
+    def get_list_display(self, request):
+        list_display = list(super().get_list_display(request))
+        if not request.user.is_superuser:
+            if 'space' in list_display: list_display.remove('space')
+            if 'creator' in list_display: list_display.remove('creator')
+        return list_display
+
+    def get_list_filter(self, request):
+        list_filter = list(super().get_list_filter(request))
+        if not request.user.is_superuser:
+            if 'space' in list_filter: list_filter.remove('space')
+            if 'creator' in list_filter: list_filter.remove('creator')
+        return list_filter
+
     access_rules = {}
     change_form_template = 'django_admin_workflow/change_form.html'
 
@@ -39,8 +54,8 @@ class WorkflowModelAdmin(admin.ModelAdmin):
         return super().response_change(request, obj)
 
     def render_change_form(self, request, context, add=False, change=False, form_url="", obj=None):
-        if change:
-            self._add_action_buttons(request, obj.status, context)
+        status = 'DRAFT' if add else obj.status
+        self._add_action_buttons(request, status, context)
         return super().render_change_form(request, context, add, change, form_url, obj)
 
     def save_model(self, request, obj, form, change):
@@ -49,8 +64,8 @@ class WorkflowModelAdmin(admin.ModelAdmin):
                 obj.creator = request.user
             obj.space = Space.objects.get_for_user(obj.creator)
         prev_status = obj.status
-        status_change, had_access = self._change_state(request, obj)
         self._invalid_save_flag = False
+        status_change, had_access = self._change_state(request, obj)
         if had_access:
             if not status_change or obj.on_before_change_status(prev_status=prev_status):
                 super().save_model(request, obj, form, change)
@@ -65,6 +80,7 @@ class WorkflowModelAdmin(admin.ModelAdmin):
                                        request, obj) or super().get_fields(request, obj)
         if not request.user.is_superuser:
             if 'status' in fields: fields.remove('status')
+            if 'space' in fields: fields.remove('space')
         return fields
 
     def get_queryset(self, request):
@@ -142,8 +158,9 @@ class WorkflowModelAdmin(admin.ModelAdmin):
                     if request.POST[cmd] == action[1] and obj.status != action[2]:
                         status_change = True
                         obj.status = action[2]
-                        self.message_user(request, "change status TODO",
-                                          level=messages.WARNING, extra_tags='extra_tags')
+                        msg = _("Status has changed to %s")
+                        self.message_user(request, msg % obj.status_label(),
+                                          level=messages.INFO, extra_tags='extra_tags')
                         break
         return status_change, had_access
 
@@ -153,9 +170,17 @@ class WorkflowModelAdmin(admin.ModelAdmin):
         """
         rules = self._get_access_rules(request)
         if self.has_user_access(request, rules, status):
-            data = [(t[0], t[1]) for t in rules[status]['actions'] ]
+            # TODO: do better
+            data = [self._get_data_action(t) for t in rules[status]['actions'] ]
             context['workflow_actions'] = data
 
+    def _get_data_action(self, action):
+        slug, name, *x = action
+        if slug == 'save':
+            return {'slug':slug, 'label':name, 'style':''}
+        role = RolePermission.objects.get(slug=slug)
+        return {'slug':slug, 'label':role.verbose_name,
+                'style':format_html('style="background:%s"' % role.bgcolor)}
 
 # cache
 _rules_session = {}

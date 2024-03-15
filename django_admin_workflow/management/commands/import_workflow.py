@@ -51,7 +51,7 @@ class Command(BaseCommand):
                 group, _ = Group.objects.get_or_create(name=gname)
             gcontent = data[gname]
             if 'creation':
-                self._set_add_change_permission(ctype, group, add=True)
+                self._set_permission(ctype, group, 'add')
 
             self._check_fields(gcontent['creation']['fields'])
             self._check_fields(gcontent['creation']['readonly_fields'])
@@ -80,13 +80,17 @@ class Command(BaseCommand):
     def _create_actions(self, ctype,  actions, group=None):
         for action in actions:
             if len(action) == 2:
-                self._set_add_change_permission(ctype, group, change=True)
+                self._set_permission(ctype, group, 'change')
 
             if len(action) < 3: continue
-            print("create role ", action[1], "for model:", ctype.model_class().__name__)
-            if self.not_dryrun: RolePermission.objects.get_or_create(ctype=ctype, slug=action[0],
-                                                 defaults={'verbose_name': action[1]})
-            self._create_status(action[2])
+            codeperm, role, status_target, *ext = action
+            print("create role ", role, "for model:", ctype.model_class().__name__)
+            if self.not_dryrun:
+                roleob, _ = RolePermission.objects.get_or_create(ctype=ctype, slug=codeperm,
+                                                 defaults={'verbose_name': role})
+                roleob.get_or_create_permission()
+                self._set_permission(ctype, group, codeperm)
+            self._create_status(status_target)
 
     def _create_status(self, slug):
         verbose = slug[0].capitalize() + slug[1:]
@@ -95,10 +99,9 @@ class Command(BaseCommand):
         if self.not_dryrun:
             status, created = Status.objects.get_or_create(slug=slug, defaults={'verbose_name': verbose})
 
-    def _set_add_change_permission(self, ctype, group, add=False, change=False):
-        if add:      perm = "add_%s" % ctype.model
-        elif change: perm = "change_%s" % ctype.model
-        else: return
+    def _set_permission(self, ctype, group, perm):
+        if perm in ('add', 'change', 'delete', 'view'):
+            perm = "%s_%s" % (perm, ctype.model)
         p = Permission.objects.get(codename=perm, content_type=ctype)
         print(perm, "permission on group", group)
         if self.not_dryrun: group.permissions.add(p)

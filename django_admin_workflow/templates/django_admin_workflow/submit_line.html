@@ -2,9 +2,9 @@
 <div class="submit-row">
 {% block submit-row %}
     {% for action in workflow_actions %}
-    <input type="submit" value="{{ action|last }}"
+    <input type="submit" value="{{ action.label }}"
            {% if forloop.first %} class="default" {% endif %}
-           name="_{{ action|first }}">
+           name="_{{ action.slug }}" {{ action.style }} >
     {% endfor %}
 {% if show_save %}<input type="submit" value="TODO Workflow" class="default" name="_save">{% endif %}
 {% if show_close %}
