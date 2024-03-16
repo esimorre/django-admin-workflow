@@ -11,13 +11,13 @@ This application was designed to stay as close as possible to the spirit of cont
 
 The goal is to add data security to CRUD through workflow: partitioning and management by roles
 
-Detailed documentation is in the "docs" directory.
+Detailed documentation is in the "docs" directory (soon).
 
 ## Quick start
 (First, it is advisable to follow the following in "dry run" mode by examining the apptest application).
 
 1. Add "django_admin_workflow" to your INSTALLED_APPS setting like this::
-```
+```python
     INSTALLED_APPS = [
         "django_admin_workflow",
         ...,
@@ -25,7 +25,7 @@ Detailed documentation is in the "docs" directory.
 ```
 
 2. Edit your project urls.py like this
-```
+```python
 # admin.sites.site.index_title = "Welcome"
 # admin.sites.site.site_title = "Django workflow"
 # admin.sites.site.site_header = "Workflow pour Django"
@@ -36,7 +36,7 @@ urlpatterns = [
 ```
 
 3. Use BaseStateModel instead of models.ModelAdmin on the object to process
-```
+```python
 from django_admin_workflow.models import BaseStateModel
 
 class MyTestModel(BaseStateModel):
@@ -49,7 +49,7 @@ class MyTestModel(BaseStateModel):
 4. Run ``python manage.py migrate`` to create the models.
 
 5. Run the gen_workflow_template command to help define the workflow
-```
+```bash
 python manage.py gen_workflow_template -h
 usage: manage.py gen_workflow_template [-m app_label.model_name] [options] [ > workflow.toml ]
 Generate a .toml workflow template file on stdout
@@ -91,7 +91,15 @@ usage: manage.py add_sample [-a [username=admin [passwd=username]]]  [options]
 Populate database with some sample data
 ```
 
-9. Start the development server and visit the admin as super-user, browse the panel,
+9. Enter the workflow file on the model's admin class
+```python
+@admin.register(MyTestModel)
+class MyTestModelAdmin(WorkflowModelAdmin):
+    access_rules = get_workflow_data(__file__, file_data="workflow.toml")
+    list_display = ...
+```
+
+10. Start the development server and visit the admin as super-user, browse the panel,
 you will be able to configure the spaces (partitioning), statuses and roles.
 
-10. log in as a regular user...and do your job :)
+11. log in as a regular user...and do your job :)
