@@ -7,6 +7,8 @@ by taking advantage of the capabilities of the django admin application.
 
 Functionality first, cosmetics and pretty panels can wait.
 
+This application was designed to stay as close as possible to the spirit of contrib admin.
+
 The goal is to add data security to CRUD through workflow: partitioning and management by roles
 Detailed documentation is in the "docs" directory.
 
