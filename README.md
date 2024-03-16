@@ -10,12 +10,13 @@ Functionality first, cosmetics and pretty panels can wait.
 This application was designed to stay as close as possible to the spirit of contrib admin.
 
 The goal is to add data security to CRUD through workflow: partitioning and management by roles
+
 Detailed documentation is in the "docs" directory.
 
 ## Quick start
+(First, it is advisable to follow the following in "dry run" mode by examining the apptest application).
 
 1. Add "django_admin_workflow" to your INSTALLED_APPS setting like this::
-
 ```
     INSTALLED_APPS = [
         "django_admin_workflow",
@@ -23,8 +24,7 @@ Detailed documentation is in the "docs" directory.
     ]
 ```
 
-2. Edit your project urls.py like this::
-
+2. Edit your project urls.py like this
 ```
 # admin.sites.site.index_title = "Welcome"
 # admin.sites.site.site_title = "Django workflow"
@@ -35,6 +35,7 @@ urlpatterns = [
 ]
 ```
 
+3. Use BaseStateModel instead of models.ModelAdmin on the object to process
 ```
 from django_admin_workflow.models import BaseStateModel
 
@@ -43,13 +44,19 @@ class MyTestModel(BaseStateModel):
     ...
 ```
 
+3. Similarly, use WorkflowModelAdmin instead of models.ModelAdmin
+
+4. Run ``python manage.py migrate`` to create the models.
+
+5. Run the gen_workflow_template command to help define the workflow
 ```
 python manage.py gen_workflow_template -h
 usage: manage.py gen_workflow_template [-m app_label.model_name] [options] [ > workflow.toml ]
 Generate a .toml workflow template file on stdout
 ```
 
-```
+6. Edit the .toml file to define the workflow groups and roles, as in this example
+```toml
 # Groupe clients
 [clients]
     filter = "lambda q, user_space, user: q.filter(space=user_space)"
@@ -69,21 +76,22 @@ Generate a .toml workflow template file on stdout
 
 ```
 
+7. Use the import_workflow command to create the groups, permissions, status, roles
+in the database from the workflow file (test it before with the --dry-run option)
 ```
 python manage.py import_workflow -h 
 usage: manage.py import_workflow workflow_file [-m app_label.model_name] [-d] [--dry-run] [options]
 import a workflow definition file (see gen_workflow_template) to generate objects in db. This command generates groups and permissions.
 ```
 
+8. Use the add_sample command to populate the database with pre-configured users
 ```
 python manage.py add_sample -h
 usage: manage.py add_sample [-a [username=admin [passwd=username]]]  [options]
 Populate database with some sample data
 ```
-Work in progress ...
 
-3. Run ``python manage.py migrate`` to create the models.
+9. Start the development server and visit the admin as super-user, browse the panel,
+you will be able to configure the spaces (partitioning), statuses and roles.
 
-4. Start the development server and visit the admin to create a poll.
-
-5. Visit the ``/polls/`` URL to participate in the poll.
+10. log in as a regular user...and do your job :)
