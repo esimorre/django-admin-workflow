@@ -50,15 +50,15 @@ class Command(BaseCommand):
             if not dry_run:
                 group, _ = Group.objects.get_or_create(name=gname)
             gcontent = data[gname]
-            if 'creation':
+            if 'creation' in gcontent:
                 self._set_permission(ctype, group, 'add')
-
-            self._check_fields(gcontent['creation']['fields'])
-            self._check_fields(gcontent['creation']['readonly_fields'])
+                self._check_fields(gcontent['creation']['fields'])
+                self._check_fields(gcontent['creation']['readonly_fields'])
 
             for status, bloc_status  in gcontent.items():
                 if status in ('creation', 'filter'): continue
                 self._create_status(status)
+                if gname == "auto": continue
                 self._check_fields(bloc_status['fields'])
                 self._check_fields(bloc_status['readonly_fields'])
                 self._create_actions(ctype, bloc_status['actions'], group)
@@ -84,12 +84,14 @@ class Command(BaseCommand):
 
             if len(action) < 3: continue
             codeperm, role, status_target, *ext = action
-            print("create role ", role, "for model:", ctype.model_class().__name__)
+            if codeperm:
+                print("create role ", role, "for model:", ctype.model_class().__name__)
             if self.not_dryrun:
-                roleob, _ = RolePermission.objects.get_or_create(ctype=ctype, slug=codeperm,
+                if codeperm:
+                    roleob, _ = RolePermission.objects.get_or_create(ctype=ctype, slug=codeperm,
                                                  defaults={'verbose_name': role})
-                roleob.get_or_create_permission()
-                self._set_permission(ctype, group, codeperm)
+                    roleob.get_or_create_permission()
+                    self._set_permission(ctype, group, codeperm)
             self._create_status(status_target)
 
     def _create_status(self, slug):

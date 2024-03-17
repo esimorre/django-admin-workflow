@@ -26,6 +26,9 @@ _template = """
 #    actions = [ ["save",       "Save"],
 #                ["can_submit", "Submit", "submited"],
 #                ["can_cancel",     "Cancel", "canceled"]]
+#    # optionals:
+#    views_extra = [["do_something", "Do something (NYI)"]]
+#    executor = ["apptest", "sendmail_executor", "sent", "send_fail"]
 
 #### Add others [GROUP_NAME] sections
 """

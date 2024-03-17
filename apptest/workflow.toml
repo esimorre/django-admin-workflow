@@ -14,4 +14,7 @@
     actions = [ ["save",     "Enregistrer"],
                 ["can_submit",   "Soumettre", "submited"],
                 ["can_cancel",   "Annuler",   "canceled"]]
-
+    views_extra = [["do_something", "Do something (NYI)"]]
+[auto]
+    [auto.sent]
+    [auto.fail_sent]

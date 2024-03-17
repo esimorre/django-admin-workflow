@@ -1,5 +1,5 @@
 # django-admin-workflow
-
+*Like a state-machine (Get on up !)*
 
 An application for django that allows you to focus on data modeling,
 data process and functionality without investing in the user interface
@@ -11,10 +11,24 @@ This application was designed to stay as close as possible to the spirit of cont
 
 The goal is to add data security to CRUD through workflow: partitioning and management by roles
 
-Detailed documentation is in the "docs" directory (soon).
-
+## Basic principles
+Let's illustrate them by example
+ * given
+   * user1 belongs to the "Dept1" and "customers" groups
+   * user2 belongs to the "Dept2" and "customers" groups
+ * user2 sees nothing of the data created by user1
+ * user1 can only do what the "customers" group allows
+ * "Dept1" is a partition group (space)
+ * "customers" is a role group.
+ * these below no longer have a global scope (except for the superuser):
+   * the "fields" and "read_onlyfields" attributes of model admin
+   * the permissions on the model
+   * it depend on the user role and status of the model instance.
+ * the admin interface is no longer reserved for backend use, but also for
+the end user interface
+ 
 ## Quick start
-(First, it is advisable to follow the following in "dry run" mode by examining the apptest application).
+(First, it is advisable to follow the following in "dry run" mode by browsing the apptest application).
 
 1. Add "django_admin_workflow" to your INSTALLED_APPS setting like this::
 ```python
@@ -84,7 +98,7 @@ usage: manage.py import_workflow workflow_file [-m app_label.model_name] [-d] [-
 import a workflow definition file (see gen_workflow_template) to generate objects in db. This command generates groups and permissions.
 ```
 
-8. Use the add_sample command to populate the database with pre-configured users
+8. Use the add_sample command to populate the database with pre-configured users and spaces
 ```
 python manage.py add_sample -h
 usage: manage.py add_sample [-a [username=admin [passwd=username]]]  [options]
@@ -103,3 +117,5 @@ class MyTestModelAdmin(WorkflowModelAdmin):
 you will be able to configure the spaces (partitioning), statuses and roles.
 
 11. log in as a regular user...and do your job :)
+
+*Stay on the scene*

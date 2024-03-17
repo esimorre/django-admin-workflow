@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes.models import ContentType
 
+from apptest.models import MyTestModel
 from django_admin_workflow.models import Space, Status, RolePermission
 
 def create_su():
@@ -28,3 +29,8 @@ def create_states(slugs, app_label="apptest", model_name="mytestmodel", cls=Stat
 
 def create_roles(slugs, app_label="apptest", model_name="mytestmodel"):
     create_states(slugs, app_label, model_name, cls=RolePermission)
+
+def create_obj(name, user, status='DRAFT', *args):
+    user = User.objects.get(username=user)
+    return MyTestModel.objects.create(name=name, creator=user, status=status,
+                               space=Space.objects.get_for_user(user), *args)

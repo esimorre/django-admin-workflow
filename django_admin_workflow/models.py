@@ -2,6 +2,7 @@ from django.contrib.auth.models import Group, User, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import Q
+from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
@@ -59,7 +60,7 @@ class BaseStateModel(models.Model):
     class Meta:
         abstract = True
 
-class NotificationConfig(models.Model):
+class NotificationConfig(models.Model): # TODO
     space = models.ForeignKey(Space, null=True, blank=True, on_delete=models.CASCADE)
     status = models.CharField(max_length=40, default=_("all"))
     role = models.ForeignKey(Group, null=True, blank=True, related_name='notifier_configs',
@@ -139,3 +140,41 @@ class RolePermission(RoleStatusMixin):
 
     class Meta:
         verbose_name = 'Role'
+
+class Executor(models.Model):
+    status = models.SlugField(max_length=20, help_text=_("status of objects to be processed"))
+    space = models.ForeignKey(Space, null=True, blank=True, on_delete=models.CASCADE,
+                             verbose_name=_("space"))
+    last_run_datetime = models.DateTimeField(null=True, blank=True)
+    last_OK = models.BooleanField(default=False)
+    running = models.BooleanField(default=False)
+
+    def _start_exec(self):
+        if self.running: return False
+        self.running = True
+        self.last_run_datetime = timezone.now()
+        self.save()
+        return True
+
+    def _end_exec(self, error=None):
+        if error: print("End run on error", error)
+        self.last_OK = error == None
+        self.running = False
+        self.save()
+
+    def run_(self, status, queryset):
+        if not self._start_exec(): return
+        try:
+            nok, msg = self.run(status, queryset)
+            error = None
+            if nok: error = msg
+            self._end_exec(error=error)
+        except Exception as e:
+            self._end_exec(error=str(e))
+
+    def run(self, status, queryset):
+        raise Exception("the run method must be overridden")
+
+    class Meta:
+        abstract = True
+        verbose_name = _("Executor")
