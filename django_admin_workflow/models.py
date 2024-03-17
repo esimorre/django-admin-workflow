@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib.auth.models import Group, User, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -139,3 +141,40 @@ class RolePermission(RoleStatusMixin):
 
     class Meta:
         verbose_name = 'Role'
+
+class Executor(models.Model):
+    status = models.SlugField(max_length=20, help_text=_("status of objects to be processed"))
+    space = models.ForeignKey(Space, null=True, blank=True, on_delete=models.CASCADE,
+                             verbose_name=_("space"))
+    last_run_datetime = models.DateTimeField(null=True, blank=True)
+    last_OK = models.BooleanField(default=False)
+    running = models.BooleanField(default=False)
+
+    def _start_exec(self):
+        if self.running: return False
+        self.running = True
+        self.last_run_datetime = datetime.now()
+        self.save()
+        return True
+
+    def _end_exec(self, error=None):
+        self.last_OK = error == None
+        self.running = False
+        self.save()
+
+    def run_(self, status, obj):
+        if not self._start_exec(): return
+        try:
+            nok, msg = self.run(status, obj)
+            error = None
+            if nok: error = msg
+            self._end_exec(error=msg)
+        except Exception as e:
+            self._end_exec(error=str(e))
+
+    def run_(self, status, obj):
+        raise Exception("the run method must be overridden")
+
+    class Meta:
+        abstract = True
+        verbose_name = _("Executor")

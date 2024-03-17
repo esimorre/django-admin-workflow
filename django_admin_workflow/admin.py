@@ -175,6 +175,8 @@ class WorkflowModelAdmin(admin.ModelAdmin):
             # TODO: do better
             data = [self._get_data_action(t) for t in rules[status]['actions'] ]
             context['workflow_actions'] = data
+            if 'commands' in rules[status]:
+                context['workflow_cmds'] = rules[status]['commands']
 
     def _get_data_action(self, action):
         slug, name, *x = action

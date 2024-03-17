@@ -1,6 +1,6 @@
 from django.db import models
 
-from django_admin_workflow.models import BaseStateModel
+from django_admin_workflow.models import BaseStateModel, Executor
 
 
 class MyTestModel(BaseStateModel):
@@ -12,3 +12,10 @@ class MyTestModel(BaseStateModel):
 
     def __str__(self):
         return self.name
+
+class SendmailExecutor(Executor):
+    nb_obj_min = 1
+    nb_attempts_max = 3
+    def run(self, status, obj=None):
+        print("NYI: send mail")
+        return 0, "OK"
