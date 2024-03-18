@@ -2,7 +2,7 @@ from django.contrib import admin, messages
 from django.contrib.admin.models import LogEntry
 from django.utils.html import format_html
 
-from .models import Space, Status, RolePermission
+from .models import Space, Status, RolePermission, NotificationConfig, UserSetting
 from django.utils.translation import gettext_lazy as _
 
 
@@ -197,4 +197,24 @@ class StatusAdmin(admin.ModelAdmin):
 @admin.register(RolePermission)
 class RolePermissionAdmin(admin.ModelAdmin):
     list_display = ('color_display', 'slug', 'ctype', 'groups')
+
+@admin.register(NotificationConfig)
+class NotificationConfigAdmin(admin.ModelAdmin):
+    list_display = ('space', 'status', 'role', 'email_active')
+
+@admin.register(UserSetting)
+class UserSettingAdmin(admin.ModelAdmin):
+    list_display = ('link_field', 'email_active', 'reactive_date')
+    def get_queryset(self, request):
+        qs =  super().get_queryset(request)
+        if not request.user.is_superuser:
+               qs = qs.filter(user=request.user)
+        return qs
+    def get_list_display(self, request):
+        fields = super().get_list_display(request)
+        if request.user.is_superuser:
+            fields = ['user', 'email_active', 'reactive_date']
+        return fields
+
+
 

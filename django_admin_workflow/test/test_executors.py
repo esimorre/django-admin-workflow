@@ -28,6 +28,7 @@ class TestCase(BaseWorkflowTestCase):
 
 
     def test2(self):
+        mailbox = mail.outbox = []
         self.assertEqual(MyTestModel.objects.count(), 1)
         ExecCmd().handle(executors=['apptest.sendmailexecutor'],
                             models=['apptest.mytestmodel'], status=["DRAFT"])
@@ -40,10 +41,9 @@ class TestCase(BaseWorkflowTestCase):
 
         obj.name = "(simul error sendmail)"
         obj.save()
-        mail.outbox = []
         ExecCmd().handle(executors=['apptest.sendmailexecutor'],
                             models=['apptest.mytestmodel'], status=["sent"])
-        self.assertEqual( len(mail.outbox), 1)
+        self.assertEqual( len(mail.outbox), 2)
         obj = MyTestModel.objects.first()
         self.assertEqual( obj.status, "fail_sent" )
 

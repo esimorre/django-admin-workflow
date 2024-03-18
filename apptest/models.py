@@ -1,5 +1,6 @@
 from django.core.mail import send_mail
 from django.db import models
+from django.template import loader
 
 from django_admin_workflow.models import BaseStateModel, Executor, Status, UserSetting, NotificationConfig
 
@@ -38,9 +39,21 @@ class SendmailExecutor(Executor):
             # user settings TODO
             usettings, _ = UserSetting.objects.get_or_create(user=obj.creator)
             if not usettings.email_active: continue
+
+            app_label = self._meta.app_label
+            template = loader.select_template(['%s/mail/notif_%s.txt' % (app_label, obj.status),
+                                               '%s/mail/notif.txt' % app_label,
+                                               'django_admin_workflow/mail/notif.txt'])
+            context = {
+                'obj': obj,
+                'status': status,
+                'user': obj.creator.first_name or obj.creator.username,
+                'settings_link': obj.creator.notif_config.get_absolute_url()
+            }
+
             cr = send_mail(
                 "Subject here",
-                "Here is the message.",
+                template.render(context=context),
                 "from@example.com",
                 [obj.creator.email],
                 fail_silently=False,

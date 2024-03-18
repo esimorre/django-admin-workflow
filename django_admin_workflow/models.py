@@ -53,6 +53,11 @@ class BaseStateModel(models.Model):
         """
         pass
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse("admin:%s_%s_change" % (self._meta.app_label, self._meta.model_name),
+                       args=[self.pk])
+
     def status_label(self):
         return Status.objects.get(slug=self.status).verbose_name
     status_label.short_description = _("status")
@@ -60,21 +65,37 @@ class BaseStateModel(models.Model):
     class Meta:
         abstract = True
 
+class NotificationConfigManager(models.Manager):
+    def get_users_to_notify(self):
+        pass # TODO
 class NotificationConfig(models.Model): # TODO
     space = models.ForeignKey(Space, null=True, blank=True, on_delete=models.CASCADE)
     status = models.CharField(max_length=40, default="all")
     role = models.ForeignKey(Group, null=True, blank=True, related_name='notifier_configs',
                              on_delete=models.CASCADE)
     email_active = models.BooleanField(default=True)
+    objects = NotificationConfigManager()
 
 
 class UserSetting(models.Model):
-    user = models.OneToOneField(User, related_name='notif_config', on_delete=models.CASCADE)
-    email_active = models.BooleanField(default=True)
-    reactive_date = models.DateField(null=True, blank=True)
+    user = models.OneToOneField(User, related_name='notif_config',
+                                editable=False, on_delete=models.CASCADE)
+    email_active = models.BooleanField(default=True, verbose_name=_("email notification active"))
+    reactive_date = models.DateField(null=True, blank=True, verbose_name=_("reactivation date"))
+
+    def link_field(self):
+        return _("Notifications")
+    link_field.short_description = _("my settings")
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse("admin:django_admin_workflow_usersetting_change", args=[self.pk])
+
+    def __str__(self):
+        return _("%s's settings") % self.user.username
 
     class Meta:
         verbose_name = _("Settings")
+        verbose_name_plural = _("Settings")
 
 
 def _get_role_groups():

@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
 
 from apptest.models import MyTestModel
@@ -14,7 +14,11 @@ def create_users(users, space, group_add=None):
     :name:  space name
     :group_add: group name allowing to add objects (default None)
     """
-    Space.objects.get_or_create(label=space)
+    space, created = Space.objects.get_or_create(label=space)
+    if created: space.group.permissions.add(
+        Permission.objects.get_by_natural_key('change_usersetting', 'django_admin_workflow', 'usersetting'))
+
+
     for u in users:
         obu = User.objects.create_user(u, password=u, email="%s@test.fr" % u, is_staff=True)
         UserSetting.objects.create(user=obu)

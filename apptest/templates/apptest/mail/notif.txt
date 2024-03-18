@@ -1,0 +1,2 @@
+{% extends 'django_admin_workflow\mail\notif.txt' %}
+TODO

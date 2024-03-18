@@ -1,0 +1,8 @@
+Hi {{ user }},
+
+The following items have moved to the state: {{ status }}
+  {{ obj }} {{ obj.get_absolute_url }}
+
+See you soon,
+-----------------------------------------
+You can adjust notification settings here: {{ settings_link }}
