@@ -2,7 +2,8 @@ from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes.models import ContentType
 
 from apptest.models import MyTestModel
-from django_admin_workflow.models import Space, Status, RolePermission
+from django_admin_workflow.models import Space, Status, RolePermission, UserSetting
+
 
 def create_su():
     return User.objects.create_superuser("admin", "admin@test.fr", "admin")
@@ -15,7 +16,8 @@ def create_users(users, space, group_add=None):
     """
     Space.objects.get_or_create(label=space)
     for u in users:
-        obu = User.objects.create_user(u, password=u, is_staff=True)
+        obu = User.objects.create_user(u, password=u, email="%s@test.fr" % u, is_staff=True)
+        UserSetting.objects.create(user=obu)
         obu.groups.add(Group.objects.get_or_create(name=space)[0])
         if group_add:
             obu.groups.add(Group.objects.get_or_create(name=group_add)[0])

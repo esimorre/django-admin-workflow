@@ -3,7 +3,6 @@ from time import sleep
 from django.core.management import BaseCommand
 from django_admin_workflow.management.commands._private import get_target_ctype, get_fields_model
 
-
 class Command(BaseCommand):
     help = "Run executor(s) typically with cron"
     def create_parser(self, prog_name, subcommand, **kwargs):

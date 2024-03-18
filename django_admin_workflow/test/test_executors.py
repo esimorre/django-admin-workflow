@@ -5,6 +5,7 @@ from django_admin_workflow.test.base import BaseWorkflowTestCase
 from django_admin_workflow.management.commands.import_workflow import Command as ImportCmd
 from django_admin_workflow.management.commands.run_executors import Command as ExecCmd
 from django_admin_workflow.test.helpers import create_obj
+from django.core import mail
 
 
 class TestCase(BaseWorkflowTestCase):
@@ -39,8 +40,10 @@ class TestCase(BaseWorkflowTestCase):
 
         obj.name = "(simul error sendmail)"
         obj.save()
+        mail.outbox = []
         ExecCmd().handle(executors=['apptest.sendmailexecutor'],
                             models=['apptest.mytestmodel'], status=["sent"])
+        self.assertEqual( len(mail.outbox), 1)
         obj = MyTestModel.objects.first()
         self.assertEqual( obj.status, "fail_sent" )
 

@@ -62,13 +62,15 @@ class BaseStateModel(models.Model):
 
 class NotificationConfig(models.Model): # TODO
     space = models.ForeignKey(Space, null=True, blank=True, on_delete=models.CASCADE)
-    status = models.CharField(max_length=40, default=_("all"))
+    status = models.CharField(max_length=40, default="all")
     role = models.ForeignKey(Group, null=True, blank=True, related_name='notifier_configs',
                              on_delete=models.CASCADE)
+    email_active = models.BooleanField(default=True)
+
 
 class UserSetting(models.Model):
     user = models.OneToOneField(User, related_name='notif_config', on_delete=models.CASCADE)
-    active = models.BooleanField(default=True)
+    email_active = models.BooleanField(default=True)
     reactive_date = models.DateField(null=True, blank=True)
 
     class Meta:
