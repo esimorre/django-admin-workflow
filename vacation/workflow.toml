@@ -1,0 +1,32 @@
+# Groupe clients
+[employees]
+    filter = "lambda q, user_space, user: q.filter(space=user_space)"
+
+    # création d'un objet dans le workflow
+    [employees.creation]
+        fields =  ['begin', 'end', 'comment']
+
+    # Etat DRAFT
+    [employees.DRAFT]
+        fields =  ['begin', 'end', 'comment']
+        actions = [ ["save",     "Enregistrer"],
+                    ["submit",   "Soumettre", "check"],
+                    ["cancel",   "Annuler",   "canceled"]]
+[managers]
+    filter = "lambda q, user_space, user: q.filter(space=user_space)"
+
+    [managers.submited]
+        fields =  ['begin', 'end', 'comment', 'status']
+        readonly_fields = ['status']
+        actions = [ ["approve",   "Approve", "approved"],
+                    ["reject",   "Reject",   "rejected"]]
+
+[auto]
+    [auto.check]
+        actions = [ ['', 'insufficient balance', 'DRAFT'],
+                    ['', '', 'submited']]
+
+    [auto.approved]
+        actions = [ ['', '', 'archived']]
+
+    [auto.rejected]

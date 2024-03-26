@@ -34,6 +34,9 @@ class Command(BaseCommand):
         if wf_ready:
             print ("error executor", ctype_exe)
             return
+        if ctype_model.app_label != ctype_exe.app_label:
+            print ("WARNING: executor app and worflow model app are different",
+                   ctype_exe.app_label, ctype_model.app_label)
 
         if cron_simul:
             while True:

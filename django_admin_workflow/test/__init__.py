@@ -1,6 +1,6 @@
 
 
-def create_data(create_su=False, dry_run=False):
+def _create_data(create_su=False, dry_run=False):
     from django_admin_workflow.test.helpers import create_users, create_su as _create_su
     if dry_run:
         print("-------- DRY-RUN ---------")
@@ -15,3 +15,5 @@ def create_data(create_su=False, dry_run=False):
     if create_su:
         print("create superuser admin/admin")
         if not dry_run: _create_su()
+
+create_data = _create_data

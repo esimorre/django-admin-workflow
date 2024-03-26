@@ -36,7 +36,7 @@ class Command(BaseCommand):
         if not ctype:
             print("No workflow model detected or simple model mentioned.")
             return
-        if nb_wf > 1:
+        if nb_wf > 1 and not model:
             print("Several workflow model detected. please use -m option.")
             return
         if not workflow_file.endswith(".toml"):
@@ -52,15 +52,14 @@ class Command(BaseCommand):
             gcontent = data[gname]
             if 'creation' in gcontent:
                 self._set_permission(ctype, group, 'add')
-                self._check_fields(gcontent['creation']['fields'])
-                self._check_fields(gcontent['creation']['readonly_fields'])
+                self._check_fields(gcontent['creation'])
 
             for status, bloc_status  in gcontent.items():
                 if status in ('creation', 'filter'): continue
                 self._create_status(status)
                 if gname == "auto": continue
-                self._check_fields(bloc_status['fields'])
-                self._check_fields(bloc_status['readonly_fields'])
+                self._check_fields(bloc_status)
+                print(status)
                 self._create_actions(ctype, bloc_status['actions'], group)
 
 
@@ -71,10 +70,12 @@ class Command(BaseCommand):
             dic = tomli.load(f)
         return dic
 
-    def _check_fields(self, items):
-        items = set(items)
-        if items.issubset(self.fields_model): return True
-        print ("WARNING - Fields unknown: ", self.fields_model.difference(items))
+    def _check_fields(self, bloc, types=('fields', 'readonly_fields')):
+        for type in types:
+            if type not in bloc: continue
+            items = set(bloc[type])
+            if items.issubset(self.fields_model): return True
+            print ("WARNING - Fields unknown: ", self.fields_model.difference(items))
 
 
     def _create_actions(self, ctype,  actions, group=None):

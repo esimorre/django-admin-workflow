@@ -25,6 +25,6 @@ admin.sites.site.site_header = "Workflow pour Django"
 
 urlpatterns = [
     path("workflow/", WorkflowPageView.as_view(),
-         {'workflow':"apptest/workflow.toml"}, name='workflow'),
+         {'workflow':"vacation/workflow.toml"}, name='workflow'),
     path('', admin.site.urls),
 ]
