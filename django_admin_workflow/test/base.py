@@ -3,7 +3,6 @@ from datetime import timedelta
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from apptest.models import MyTestModel
 from django_admin_workflow.models import Space
 
 
@@ -26,14 +25,15 @@ class BaseWorkflowTestCase(TestCase):
         self.client.logout()
         self.assertAnonymous()
 
-    def create_workflow_ob(self, type='OK', value=None):
+    def create_workflow_ob(self, cls, type='OK', value=None):
+        """ TODO
         print("  +++ create ob type", type, "value", value or '(random)')
         if not value: value = '(random) TODO '
-        ob = MyTestModel.objects.create(creator=self._user, space=Space.objects.get_for_user(self._user),
+        ob = cls.objects.create(creator=self._user, space=Space.objects.get_for_user(self._user),
                                         name=value + type, duration=timedelta(seconds=101))
         self.assertEqual(ob.status, 'DRAFT')
         print(ob.name, ob.duration)
-        return ob
+        return ob"""
 
     def assertAcessApps(self, rep, apps):
         self.assertEqual(rep.status_code, 200)

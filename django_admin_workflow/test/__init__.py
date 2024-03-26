@@ -10,8 +10,7 @@ def _create_data(create_su=False, dry_run=False):
     print("create users cli2, cli2b (passwd=login) in space Dep2 belonging to the group clients")
     if not dry_run:
         create_users(users=('cli2', 'cli2b'), space="Dep2", group_add='clients')
-    #create_states(("accepted", "valid", "published",))
-    #create_roles(("submiter", "validator", "publisher"))
+
     if create_su:
         print("create superuser admin/admin")
         if not dry_run: _create_su()

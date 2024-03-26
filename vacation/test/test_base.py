@@ -1,9 +1,9 @@
-from django.contrib.auth.models import Permission
-from django.test import TestCase
-from apptest.models import MyTestModel
-from .base import BaseWorkflowTestCase
+from django.contrib.auth.models import Permission, User
+from django.contrib.contenttypes.models import ContentType
 
-from .helpers import *
+from django_admin_workflow.test.base import BaseWorkflowTestCase
+from django_admin_workflow.test.helpers import create_users
+from vacation.models import Vacation
 
 
 class BasicTestCase(BaseWorkflowTestCase):
@@ -18,7 +18,7 @@ class BasicTestCase(BaseWorkflowTestCase):
 
 
     def test2_add_perms(self):
-        ct = ContentType.objects.get_for_model(MyTestModel)
+        ct = ContentType.objects.get_for_model(Vacation)
         users = User.objects.all()
         p = Permission.objects.get_by_natural_key(codename="add_mytestmodel",
                                                   app_label="apptest", model="mytestmodel")

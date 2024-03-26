@@ -1,7 +1,9 @@
 from django.contrib.auth.models import Group, User, Permission
 from django.contrib.contenttypes.models import ContentType
+from django.core.mail import send_mail
 from django.db import models
 from django.db.models import Q
+from django.template import loader
 from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
@@ -201,3 +203,56 @@ class Executor(models.Model):
     class Meta:
         abstract = True
         verbose_name = _("Executor")
+
+class SendmailExecutor(Executor):
+    nb_obj_min = 1
+    nb_attempts_max = 3
+    def run(self, status, queryset=None):
+        assert self.status == status or not self.status
+
+        global_settings, _ = NotificationConfig.objects.get_or_create()
+        if not global_settings.email_active:
+            return 0, "email notification not active" # TODO
+
+        if status and status != [None] and Status.objects.filter(slug__in=status).count() == 0:
+            return 1, "Error SendmailExecutor.run: status %s unknown" % status
+        if queryset:
+            objs = queryset
+        else:
+            # objs = MyTestModel.objects.filter(status__in=status)
+            # TODO
+            raise Exception("NYI")
+
+        for obj in objs:
+            print("process senmail for", obj, "with status", status)
+
+            # settings
+            # user settings TODO
+            usettings, _ = UserSetting.objects.get_or_create(user=obj.creator)
+            if not usettings.email_active: continue
+
+            app_label = self._meta.app_label
+            template = loader.select_template(['%s/mail/notif_%s.txt' % (app_label, obj.status),
+                                               '%s/mail/notif.txt' % app_label,
+                                               'django_admin_workflow/mail/notif.txt'])
+            context = {
+                'obj': obj,
+                'status': status,
+                'user': obj.creator.first_name or obj.creator.username,
+                'settings_link': obj.creator.notif_config.get_absolute_url()
+            }
+
+            cr = send_mail(
+                "Subject here",
+                template.render(context=context),
+                "from@example.com",
+                [obj.creator.email],
+                fail_silently=False,
+            )
+
+            if "error" in str(obj.name):
+                obj.status = 'fail_sent' # simulation fail sendmail for test
+            else:
+                obj.status = "sent"
+            obj.save()
+        return 0, "OK"
