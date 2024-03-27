@@ -23,4 +23,9 @@ class UserAccount(models.Model):
 
 class VacationExecutor(Executor):
     def run(self, status, queryset):
-        return 1, "not yet implemented"
+        for obj in queryset.filter(status=status):
+            if obj.end < obj.begin or  'bad request' in obj.comment:
+                obj.comment = obj.comment + "\nRequest invalid"
+                obj.save()
+
+        return 0, "OK"

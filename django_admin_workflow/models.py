@@ -250,7 +250,7 @@ class SendmailExecutor(Executor):
                 fail_silently=False,
             )
 
-            if "error" in str(obj.name):
+            if "error" in str(obj.comment):
                 obj.status = 'fail_sent' # simulation fail sendmail for test
             else:
                 obj.status = "sent"

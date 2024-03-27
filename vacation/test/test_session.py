@@ -12,7 +12,7 @@ class TestCase(BaseWorkflowTestCase):
 
     def test1(self):
         self.assertAnonymous()
-        self.connect("cli1")
+        self.connect("albert")
         rep = self.client.get("/vacation/")
         self.assertAcessApps(rep, ['vacation'])
 

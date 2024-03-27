@@ -35,7 +35,7 @@ def create_states(slugs, app_label="apptest", model_name="mytestmodel", cls=Stat
 def create_roles(slugs, app_label="apptest", model_name="mytestmodel"):
     create_states(slugs, app_label, model_name, cls=RolePermission)
 
-def create_obj(name, cls, user, status='DRAFT', **kwargs):
+def create_obj(cls, user, status='DRAFT', **kwargs):
     user = User.objects.get(username=user)
     return cls.objects.create(creator=user, status=status,
                                space=Space.objects.get_for_user(user), **kwargs)
