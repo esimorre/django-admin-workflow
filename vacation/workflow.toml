@@ -30,3 +30,5 @@
         actions = [ ['', '', 'archived']]
 
     [auto.rejected]
+    [auto.archived]
+    [auto.fail_sent]

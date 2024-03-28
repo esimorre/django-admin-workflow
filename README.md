@@ -28,7 +28,7 @@ Let's illustrate them by example
 the end user interface
  
 ## Quick start
-(First, it is advisable to follow the following in "dry run" mode by browsing the apptest application).
+(First, it is advisable to follow the following in "dry run" mode by browsing the vacation application).
 
 1. Add "django_admin_workflow" to your INSTALLED_APPS setting like this::
 ```python

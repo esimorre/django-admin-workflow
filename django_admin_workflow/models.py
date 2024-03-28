@@ -207,6 +207,9 @@ class Executor(models.Model):
 class SendmailExecutor(Executor):
     nb_obj_min = 1
     nb_attempts_max = 3
+    fail_status = 'fail_sent'
+    sent_status = 'sent'
+    _test_simul_failsent = False
     def run(self, status, queryset=None):
         assert self.status == status or not self.status
 
@@ -242,17 +245,20 @@ class SendmailExecutor(Executor):
                 'settings_link': obj.creator.notif_config.get_absolute_url()
             }
 
-            cr = send_mail(
-                "Subject here",
-                template.render(context=context),
-                "from@example.com",
-                [obj.creator.email],
-                fail_silently=False,
-            )
-
-            if "error" in str(obj.comment):
-                obj.status = 'fail_sent' # simulation fail sendmail for test
+            if self._test_simul_failsent:
+                nb_sent = 0
             else:
-                obj.status = "sent"
+                nb_sent = send_mail(
+                    "Subject here",
+                    template.render(context=context),
+                    "from@example.com",
+                    [obj.creator.email],
+                    fail_silently=True,
+                )
+
+            if nb_sent == 0:
+                obj.status = self.fail_status
+            else:
+                obj.status = self.sent_status
             obj.save()
         return 0, "OK"

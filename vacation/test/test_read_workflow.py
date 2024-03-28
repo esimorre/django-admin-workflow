@@ -7,9 +7,9 @@ from django.contrib.auth.models import Group
 class ReadWorkflow(TestCase):
     def test1_read_toml(self):
         dic = {}
-        with open("apptest/workflow.toml", "rb") as f:
+        with open("vacation/workflow.toml", "rb") as f:
             dic = tomli.load(f)
-        self.assertTrue('clients' in dic)
+        self.assertTrue('employees' in dic)
         for data in dic.values():
             if 'filter' in data and data['filter'].strip().startswith("lambda"):
                 data['filter'] = eval(data['filter'])

@@ -25,14 +25,14 @@ def create_users(users, space, group_add=None):
         if group_add:
             obu.groups.add(Group.objects.get_or_create(name=group_add)[0])
 
-def create_states(slugs, app_label="apptest", model_name="mytestmodel", cls=Status):
+def create_states(slugs, app_label, model_name, cls=Status):
     ct = ContentType.objects.get_by_natural_key(app_label, model_name)
     for slug in slugs:
         verb = slug[0].capitalize() + slug[1:]
         cls.objects.get_or_create(ctype=ct, slug=slug,
                                      defaults={"verbose_name": verb})
 
-def create_roles(slugs, app_label="apptest", model_name="mytestmodel"):
+def create_roles(slugs, app_label, model_name):
     create_states(slugs, app_label, model_name, cls=RolePermission)
 
 def create_obj(cls, user, status='DRAFT', **kwargs):

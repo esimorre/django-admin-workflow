@@ -28,7 +28,7 @@ _template = """
 #                ["can_cancel",     "Cancel", "canceled"]]
 #    # optionals:
 #    views_extra = [["do_something", "Do something (NYI)"]]
-#    executor = ["apptest", "sendmail_executor", "sent", "send_fail"]
+#    executor = ["django_admin_workflow", "sendmail_executor", "sent", "send_fail"]
 
 #### Add others [GROUP_NAME] sections
 """

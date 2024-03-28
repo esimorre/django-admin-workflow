@@ -20,8 +20,8 @@ class TestCase(BaseWorkflowTestCase):
                    end=datetime.date(2024, 8, 8), comment="bad request")
 
     def test0(self):
-        self.assertTrue( Status.objects.get(slug="sent") )
-        self.assertTrue( Status.objects.get(slug="fail_sent") )
+        self.assertTrue( Status.objects.get(slug="submited") )
+        self.assertTrue( Status.objects.get(slug="archived") )
 
     def test1(self):
         #ExecCmd().handle(executors, models=None, status=None, spaces=None, cron_simul=None)
@@ -32,7 +32,7 @@ class TestCase(BaseWorkflowTestCase):
 
 
     def test2(self):
-        mailbox = mail.outbox = []
+        mail.outbox = []
         self.assertEqual(Vacation.objects.count(), 1)
         ExecCmd().handle(executors=['django_admin_workflow.sendmailexecutor'],
                             models=['vacation.vacation'], status=["DRAFT"])
@@ -41,13 +41,16 @@ class TestCase(BaseWorkflowTestCase):
         self.assertEqual(exec.running, False)
 
         obj = Vacation.objects.first()
-        self.assertEqual( obj.status, "DRAFT" )
+        self.assertEqual( obj.status, "sent" )
+        self.assertEqual( len(mail.outbox), 1)
 
+        SendmailExecutor._test_simul_failsent = True
         obj.comment = "(simul error sendmail)"
+        obj.status = "approved" # status must be registered in workflow.toml, sent is not
         obj.save()
         ExecCmd().handle(executors=['django_admin_workflow.sendmailexecutor'],
-                            models=['vacation.vacation'], status=["sent"])
-        self.assertEqual( len(mail.outbox), 2)
+                            models=['vacation.vacation'], status=["approved"])
+        self.assertEqual( len(mail.outbox), 1)
         obj = Vacation.objects.first()
         self.assertEqual( obj.status, "fail_sent" )
 

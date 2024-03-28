@@ -20,8 +20,8 @@ class BasicTestCase(BaseWorkflowTestCase):
     def test2_add_perms(self):
         ct = ContentType.objects.get_for_model(Vacation)
         users = User.objects.all()
-        p = Permission.objects.get_by_natural_key(codename="add_mytestmodel",
-                                                  app_label="apptest", model="mytestmodel")
+        p = Permission.objects.get_by_natural_key(codename="add_vacation",
+                                                  app_label="vacation", model="vacation")
         users[0].user_permissions.set([p])
         p = Permission.objects.create(codename="can_edit", name="Can Edit", content_type=ct)
         users[0].user_permissions.add(p)
