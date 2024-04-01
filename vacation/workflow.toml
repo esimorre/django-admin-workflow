@@ -1,4 +1,4 @@
-# Groupe clients
+# Group employees
 [employees]
     filter = "lambda q, user_space, user: q.filter(space=user_space)"
 
@@ -9,9 +9,10 @@
     # Etat DRAFT
     [employees.DRAFT]
         fields =  ['begin', 'end', 'comment']
-        actions = [ ["save",     "Enregistrer"],
-                    ["submit",   "Soumettre", "check"],
-                    ["cancel",   "Annuler",   "canceled"]]
+        actions = [ ["save",     "Save"],
+                    ["submit",   "Submit", "check"],
+                    ["cancel",   "Cancel",   "canceled"]]
+# Group managers
 [managers]
     filter = "lambda q, user_space, user: q.filter(space=user_space)"
 
@@ -21,6 +22,7 @@
         actions = [ ["approve",   "Approve", "approved"],
                     ["reject",   "Reject",   "rejected"]]
 
+# autorun
 [auto]
     [auto.check]
         actions = [ ['', 'insufficient balance', 'DRAFT'],

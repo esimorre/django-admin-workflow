@@ -6,9 +6,11 @@ graph LR
 {% for a in merm_activities %}
     {{ a|safe }}
 {% endfor %}
+
 {% for a in merm_actions %}
     {{ a|safe }}
 {% endfor %}
+
 {% for tl in merm_hreftips %}
     click {{ tl.id }} href "{{ tl.href }}" "{{ tl.tip }}"
 {% endfor %}

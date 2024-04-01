@@ -29,3 +29,9 @@ class VacationExecutor(Executor):
                 obj.save()
 
         return 0, "OK"
+
+
+# override create_data for command add_sample
+import django_admin_workflow.test
+from .tests import create_data
+django_admin_workflow.test.create_data = create_data

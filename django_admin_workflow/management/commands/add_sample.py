@@ -4,7 +4,11 @@ from django_admin_workflow.test import create_data
 
 
 class Command(BaseCommand):
-    help = "Populate database with some sample data"
+    help ="""
+    Populate database with some sample data.
+    Your app should override the create_data function typically in the tests.py module
+    (see module vacation.tests)
+"""
     def create_parser(self, prog_name, subcommand, **kwargs):
         return super().create_parser(prog_name, subcommand,
             usage="%(prog)s [-a [username=admin [passwd=username]]]  [options]",
