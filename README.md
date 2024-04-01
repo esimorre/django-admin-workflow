@@ -71,23 +71,82 @@ Generate a .toml workflow template file on stdout
 
 6. Edit the .toml file to define the workflow groups and roles, as in this example
 ```toml
-# Groupe clients
-[clients]
+# Group employees
+[employees]
     filter = "lambda q, user_space, user: q.filter(space=user_space)"
 
     # création d'un objet dans le workflow
-    [clients.creation]
-    fields =  ['name', 'contact', 'status']
-    readonly_fields = ['contact', 'status']
+    [employees.creation]
+        fields =  ['begin', 'end', 'comment']
 
     # Etat DRAFT
-    [clients.DRAFT]
-    fields =  ['name', 'contact', 'status']
-    readonly_fields = ['contact', 'status']
-    actions = [ ["save",     "Enregistrer"],
-                ["can_submit",   "Soumettre", "submited"],
-                ["can_cancel",   "Annuler",   "canceled"]]
+    [employees.DRAFT]
+        fields =  ['begin', 'end', 'comment']
+        actions = [ ["save",     "Save"],
+                    ["submit",   "Submit", "check"],
+                    ["cancel",   "Cancel",   "canceled"]]
+# Group managers
+[managers]
+    filter = "lambda q, user_space, user: q.filter(space=user_space)"
 
+    [managers.submited]
+        fields =  ['begin', 'end', 'comment', 'status']
+        readonly_fields = ['status']
+        actions = [ ["approve",   "Approve", "approved"],
+                    ["reject",   "Reject",   "rejected"]]
+
+# autorun
+[auto]
+    [auto.check]
+        actions = [ ['', 'insufficient balance', 'DRAFT'],
+                    ['', '', 'submited']]
+
+    [auto.approved]
+        actions = [ ['', '', 'archived']]
+
+    [auto.rejected]
+    [auto.archived]
+    [auto.fail_sent]
+```
+
+A view allows the graphical display of the workflow using the mermaid library:
+```mermaid
+---
+title: Workflow
+---
+graph LR
+
+    DRAFT["fa:fa-tag DRAFT<hr/>fa:fa-user-pen fa:fa-list<hr/>fa:fa-user-group employees"]
+
+    check["fa:fa-tag check<hr/>fa:fa-gears auto"]
+
+    canceled["fa:fa-tag canceled<hr/>fa:fa-trash-can "]
+
+    submited["fa:fa-tag submited<hr/>fa:fa-user-pen fa:fa-list<hr/>fa:fa-user-group managers"]
+
+    approved["fa:fa-tag approved<hr/>fa:fa-gears auto"]
+
+    rejected["fa:fa-tag rejected<hr/>fa:fa-gears auto"]
+
+    archived["fa:fa-tag archived<hr/>fa:fa-gears auto"]
+
+    fail_sent["fa:fa-tag fail_sent<hr/>fa:fa-gears auto"]
+
+
+
+    DRAFT -- Submit --> check
+
+    DRAFT -- Cancel --> canceled
+
+    submited -- Approve --> approved
+
+    submited -- Reject --> rejected
+
+    check -- insufficient balance --> DRAFT
+
+    check --> submited
+
+    approved --> archived
 ```
 
 7. Use the import_workflow command to create the groups, permissions, status, roles
