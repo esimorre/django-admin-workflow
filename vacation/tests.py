@@ -1,6 +1,9 @@
+from django.contrib.auth.models import User
+
 from django_admin_workflow.management.commands.import_workflow import Command as ImportCmd
 
 from django_admin_workflow.test.base import BaseWorkflowTestCase
+from .models import UserAccount
 
 
 def create_data(create_su=False, dry_run=False):
@@ -19,6 +22,11 @@ def create_data(create_su=False, dry_run=False):
     if not dry_run:
         create_users(users=('bob',), space="french branch", group_add='managers')
         create_users(users=('claudia',), space="spain branch", group_add='managers')
+
+    print("create vacation accounts and provision")
+    if not dry_run:
+        for u in User.objects.exclude(username='admin'):
+            UserAccount.objects.get_or_create(user=u, defaults={'provision': 25})
 
     if create_su:
         print("create superuser admin/admin")

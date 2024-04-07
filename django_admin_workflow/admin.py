@@ -2,7 +2,7 @@ from django.contrib import admin, messages
 from django.contrib.admin.models import LogEntry
 from django.utils.html import format_html
 
-from .models import Space, Status, RolePermission, NotificationConfig, UserSetting
+from .models import Space, Status, RolePermission, NotificationConfig, UserSetting, Executor
 from django.utils.translation import gettext_lazy as _
 
 
@@ -217,4 +217,7 @@ class UserSettingAdmin(admin.ModelAdmin):
         return fields
 
 
-
+class ExecutorAdmin(admin.ModelAdmin):
+    list_display = ('last_run_datetime', 'status', 'space', 'last_OK', 'running')
+    list_filter = ('status', 'space', 'running')
+    date_hierarchy = 'last_run_datetime'

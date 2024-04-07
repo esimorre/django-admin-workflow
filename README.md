@@ -23,12 +23,12 @@ Let's illustrate them by example
  * these below no longer have a global scope (except for the superuser):
    * the "fields" and "read_onlyfields" attributes of model admin
    * the permissions on the model
-   * it depend on the user role and status of the model instance.
+   * it depends on the user role and status of the model instance.
  * the admin interface is no longer reserved for backend use, but also for
 the end user interface
  
 ## Quick start
-(First, it is advisable to follow the following in "dry run" mode by browsing the vacation application).
+(First, it is advisable to follow the following in "dry run" mode and browsing the vacation application example).
 
 1. Add "django_admin_workflow" to your INSTALLED_APPS setting like this::
 ```python
@@ -90,7 +90,7 @@ Generate a .toml workflow template file on stdout
     filter = "lambda q, user_space, user: q.filter(space=user_space)"
 
     [managers.submited]
-        fields =  ['begin', 'end', 'comment', 'status']
+        fields =  ['begin', 'end', 'comment']
         readonly_fields = ['status']
         actions = [ ["approve",   "Approve", "approved"],
                     ["reject",   "Reject",   "rejected"]]
@@ -163,6 +163,8 @@ python manage.py add_sample -h
 usage: manage.py add_sample [-a [username=admin [passwd=username]]]  [options]
 Populate database with some sample data
 ```
+The application should implement a data initialization function, typically in tests.create_data
+(see application vacation).
 
 9. Enter the workflow file on the model's admin class
 ```python

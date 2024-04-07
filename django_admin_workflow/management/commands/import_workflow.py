@@ -78,7 +78,7 @@ class Command(BaseCommand):
             print ("WARNING - Fields unknown: ", self.fields_model.difference(items))
 
 
-    def _create_actions(self, ctype,  actions, group=None):
+    def _create_actions(self, ctype,  actions, group):
         for action in actions:
             if len(action) == 2:
                 self._set_permission(ctype, group, 'change')
@@ -94,6 +94,8 @@ class Command(BaseCommand):
                     roleob.get_or_create_permission()
                     self._set_permission(ctype, group, codeperm)
             self._create_status(status_target)
+        # view perm is required if any custom perm
+        if self.not_dryrun: self._check_add_view_perm(ctype, group)
 
     def _create_status(self, slug):
         verbose = slug[0].capitalize() + slug[1:]
@@ -107,4 +109,16 @@ class Command(BaseCommand):
             perm = "%s_%s" % (perm, ctype.model)
         p = Permission.objects.get(codename=perm, content_type=ctype)
         print(perm, "permission on group", group)
-        if self.not_dryrun: group.permissions.add(p)
+        if self.not_dryrun:
+            group.permissions.add(p)
+            # view perm is required if any custom perm
+
+    def _check_add_view_perm(self, ctype, group):
+        """
+        change perm must be added if custom perms and no change or view perm
+        """
+        change_view_perms = ('change_%s' % ctype.model, 'view_%s' % ctype.model)
+        perms = group.permissions.filter(content_type=ctype)
+        check = perms.filter(codename__in=change_view_perms).count()
+        if perms.count() > 0 and check == 0:
+            self._set_permission(ctype, group, "change")

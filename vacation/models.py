@@ -6,8 +6,6 @@ from django.db import models
 from django_admin_workflow.models import BaseStateModel, Executor
 from django.utils.translation import gettext_lazy as _
 
-
-
 class Vacation(BaseStateModel):
     begin = models.DateField(verbose_name=_("start"))
     end = models.DateField()
@@ -22,12 +20,33 @@ class UserAccount(models.Model):
     provision = models.PositiveIntegerField()
 
 class VacationExecutor(Executor):
-    def run(self, status, queryset):
-        for obj in queryset.filter(status=status):
-            if obj.end < obj.begin or  'bad request' in obj.comment:
-                obj.comment = obj.comment + "\nRequest invalid"
-                obj.save()
+    def run(self, status_list, queryset):
+        if status_list and status_list != [None]:
+            q = queryset.filter(statu__in=status_list)
+        else:
+            q = queryset.all()
+        if q.count() > 0:
+            return self._check(q)
+        return 0, "OK"
 
+    def _check(self, q):
+        for obj in q:
+            if obj.status != "check": continue
+            delta = obj.end - obj.begin
+            if delta.days < 0 or  'bad request' in obj.comment:
+                obj.comment = obj.comment + "\nRequest invalid"
+                obj.status = "DRAFT"
+                obj.save()
+                continue
+            account = UserAccount.objects.get(user=obj.creator)
+            if delta.days + 1 > account.provision:
+                obj.comment = obj.comment + "\nInsufficient provision"
+                obj.status = "DRAFT"
+                obj.save()
+                continue
+            # OK to submited
+            obj.status = "submited"
+            obj.save()
         return 0, "OK"
 
 

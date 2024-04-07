@@ -17,7 +17,7 @@
     filter = "lambda q, user_space, user: q.filter(space=user_space)"
 
     [managers.submited]
-        fields =  ['begin', 'end', 'comment', 'status']
+        fields =  ['begin', 'end', 'comment']
         readonly_fields = ['status']
         actions = [ ["approve",   "Approve", "approved"],
                     ["reject",   "Reject",   "rejected"]]
