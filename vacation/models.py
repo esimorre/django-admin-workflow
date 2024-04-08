@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from django.contrib.auth.models import User
-from django.db import models
+from django.db import models, transaction
 
 from django_admin_workflow.models import BaseStateModel, Executor
 from django.utils.translation import gettext_lazy as _
@@ -20,13 +20,13 @@ class UserAccount(models.Model):
     provision = models.PositiveIntegerField()
 
 class VacationExecutor(Executor):
-    def run(self, status_list, queryset):
-        if status_list and status_list != [None]:
-            q = queryset.filter(statu__in=status_list)
-        else:
-            q = queryset.all()
-        if q.count() > 0:
-            return self._check(q)
+    def run(self, status, queryset):
+        if queryset.count() > 0:
+            if not status or status == "check":
+                self._check(queryset.filter(status="check"))
+            if not status or status == "approved":
+                self._archive(queryset.filter(status="approved"))
+
         return 0, "OK"
 
     def _check(self, q):
@@ -47,7 +47,17 @@ class VacationExecutor(Executor):
             # OK to submited
             obj.status = "submited"
             obj.save()
-        return 0, "OK"
+
+    def _archive(self, q):
+        for obj in q:
+            if obj.status != "approved": continue
+            delta = obj.end - obj.begin
+            with transaction.atomic():
+                account = UserAccount.objects.get(user=obj.creator)
+                account.provision -= (delta.days + 1)
+                account.save()
+                obj.status = "archived"
+                obj.save()
 
 
 # override create_data for command add_sample

@@ -167,7 +167,8 @@ class RolePermission(RoleStatusMixin):
         verbose_name = 'Role'
 
 class Executor(models.Model):
-    status = models.SlugField(max_length=20, help_text=_("status of objects to be processed"))
+    status = models.SlugField(max_length=20, null=True, blank=True,
+                              help_text=_("status of objects to be processed"))
     space = models.ForeignKey(Space, null=True, blank=True, on_delete=models.CASCADE,
                              verbose_name=_("space"))
     last_run_datetime = models.DateTimeField(null=True, blank=True)
@@ -189,13 +190,16 @@ class Executor(models.Model):
 
     def run_(self, status, queryset):
         if not self._start_exec(): return
+        error = "Unexpected error"
         try:
             nok, msg = self.run(status, queryset)
             error = None
             if nok: error = msg
             self._end_exec(error=error)
-        except Exception as e:
-            self._end_exec(error=str(e))
+        except (RuntimeError, Exception) as e:
+            error=str(e)
+            self._end_exec(error=error)
+
 
     def run(self, status, queryset):
         raise Exception("the run method must be overridden")

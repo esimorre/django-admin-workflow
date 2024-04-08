@@ -16,16 +16,18 @@ class Command(BaseCommand):
                             required=True, help="executor(s) selection")
         parser.add_argument("-m", "--models", metavar="app_label.model_name", nargs="*",
                             required=False, help="model(s) to process")
-        parser.add_argument("-p", "--spaces", nargs="*",
+        parser.add_argument("-p", "--space", nargs=1,
                             required=False, help="filter on space")
         parser.add_argument("-s", "--status", nargs=1,
                             required=False, help="filter on status")
         parser.add_argument("-c", "--cron-simul", metavar="period", nargs=1, type=int,
                             required=False, help="interactive mode with a period in seconds")
 
-    def handle(self, executors, models=None, status=None, spaces=None, cron_simul=None, *args, **options):
-        if not status: status = [None]
-        if not spaces: spaces = [None]
+    def handle(self, executors, models=None, status=None, space=None, cron_simul=None, *args, **options):
+        if status:
+            status = status[0]
+        if  space:
+            space = space[0]
         ctype_model, wf_ready, _, _ = get_target_ctype(models)
         if not wf_ready:
             print ("error model", ctype_model)
@@ -40,23 +42,23 @@ class Command(BaseCommand):
 
         if cron_simul:
             while True:
-                self._run(ctype_exe, ctype_model, status, spaces)
+                self._run(ctype_exe, ctype_model, status, space)
                 sleep(cron_simul[0])
         else:
-            self._run(ctype_exe, ctype_model, status, spaces)
+            self._run(ctype_exe, ctype_model, status, space)
 
-    def _run(self, ctype_exe, ctype_model, status, spaces):
-        print("run",ctype_exe, ctype_model, status, spaces)
+    def _run(self, ctype_exe, ctype_model, status, space):
+        print("run",ctype_exe, ctype_model, status, space)
         Exec = ctype_exe.model_class()
-        inst_exec, created = Exec.objects.get_or_create(status__in=status, space__in=spaces )
-        if not created and inst_exec.running:
+        if 0 < Exec.objects.filter(running=True, status=status, space=space).count():
             print("previous still running. exit")
             return
+        inst_exec = Exec.objects.create(status=status, space=space)
         qs = None
         if ctype_model: qs = ctype_model.model_class().objects
-        if qs and status != [None]: qs = qs.filter(status__in=status)
-        if qs and spaces != [None]: qs = qs.filter(space__in=spaces)
-        if qs and status == [None] and spaces == [None]: qs = qs.all()
+        if qs and status: qs = qs.filter(status=status)
+        if qs and space: qs = qs.filter(space=space)
+        if qs and status == None and space == None: qs = qs.all()
         print("launch exec run qs=", qs, "status", status)
         inst_exec.run_(status, qs)
 
