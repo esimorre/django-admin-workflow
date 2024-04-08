@@ -209,6 +209,7 @@ class Executor(models.Model):
         """
         change obj status and log
         """
+        if new_status == obj.status: return
         ctype = ContentType.objects.get_for_model(obj._meta.model)
         msg_tpl = _("%s change status to %s")
         obj.status = new_status
@@ -226,6 +227,7 @@ class SendmailExecutor(Executor):
     fail_status = 'fail_sent'
     sent_status = 'sent'
     _test_simul_failsent = False
+    format_html = True
     def run(self, status, queryset=None):
         assert self.status == status or not self.status
 
@@ -233,7 +235,7 @@ class SendmailExecutor(Executor):
         if not global_settings.email_active:
             return 0, "email notification not active" # TODO
 
-        if status and status != [None] and Status.objects.filter(slug__in=status).count() == 0:
+        if status and Status.objects.filter(slug=status).count() == 0:
             return 1, "Error SendmailExecutor.run: status %s unknown" % status
         if queryset:
             objs = queryset
@@ -260,20 +262,29 @@ class SendmailExecutor(Executor):
                 'user': obj.creator.first_name or obj.creator.username,
                 'settings_link': obj.creator.notif_config.get_absolute_url()
             }
+            context.update(self.get_extra_context(obj))
 
             if self._test_simul_failsent:
                 nb_sent = 0
             else:
+                msg = template.render(context=context)
+                html = None
+                if self.format_html: html = msg
                 nb_sent = send_mail(
                     "Subject here",
-                    template.render(context=context),
+                    msg,
                     "from@example.com",
                     [obj.creator.email],
                     fail_silently=True,
+                    html_message=html
                 )
+                print("mail sent:\n%s\n" % msg)
 
             if nb_sent == 0:
                 self.save_state(obj, self.fail_status)
             else:
                 self.save_state(obj, self.sent_status)
         return 0, "OK"
+
+    def get_extra_context(self, obj):
+        return {}

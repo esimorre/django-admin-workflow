@@ -1,0 +1,8 @@
+{% extends 'django_admin_workflow/mail/notif.txt' %}
+
+{% block content %}
+Your vacation request [{{ obj.comment }}] is accepted.
+    start: {{ obj.begin }}
+    end:   {{ obj.end }}
+Your vacation balance is {{ provision }} days.
+{% endblock %}

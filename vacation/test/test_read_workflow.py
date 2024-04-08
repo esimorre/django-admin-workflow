@@ -17,14 +17,14 @@ class ReadWorkflow(TestCase):
 
     def test2_import_workflow(self):
         dic_workflow = self.test1_read_toml()
-        perms, status = [], []
+        perms, status = [], set()
         for gname, data in dic_workflow.items():
             g, c = Group.objects.get_or_create(name=gname)
             for key, content in data.items():
                 if key in ('filter', 'creation'): continue
-                status.append(key)
+                status.add(key)
                 if 'actions' in content:
                     for action in content['actions']:
-                        if len(action) > 2: status.append(action[2])
+                        if len(action) > 2: status.add(action[2])
 
         print(perms, status)

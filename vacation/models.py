@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.contrib.auth.models import User
 from django.db import models, transaction
 
-from django_admin_workflow.models import BaseStateModel, Executor
+from django_admin_workflow.models import BaseStateModel, Executor, SendmailExecutor
 from django.utils.translation import gettext_lazy as _
 
 class Vacation(BaseStateModel):
@@ -54,6 +54,16 @@ class VacationExecutor(Executor):
                 account.provision -= (delta.days + 1)
                 account.save()
                 self.save_state(obj, "archived")
+
+class MailExecutor(SendmailExecutor):
+    """
+    Template used is vacation/mail/notif_archived.txt
+    the executor command should be
+        python manage.py run_executors -e vacation.mailexecutor -s archived
+    """
+    sent_status = 'archived' # status unchanged
+    def get_extra_context(self, obj):
+        return {'provision': obj.creator.vacations.first().provision}
 
 
 # override create_data for command add_sample
