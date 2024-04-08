@@ -1,3 +1,4 @@
+from django.contrib.admin.models import LogEntry, CHANGE
 from django.contrib.auth.models import Group, User, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.mail import send_mail
@@ -204,6 +205,17 @@ class Executor(models.Model):
     def run(self, status, queryset):
         raise Exception("the run method must be overridden")
 
+    def save_state(self, obj, new_status):
+        """
+        change obj status and log
+        """
+        ctype = ContentType.objects.get_for_model(obj._meta.model)
+        msg_tpl = _("%s change status to %s")
+        obj.status = new_status
+        obj.save()
+        LogEntry.objects.log_action(obj.creator.pk, ctype.pk, obj.pk, str(obj), CHANGE,
+            msg_tpl % (self.Meta.verbose_name, new_status))
+
     class Meta:
         abstract = True
         verbose_name = _("Executor")
@@ -261,8 +273,7 @@ class SendmailExecutor(Executor):
                 )
 
             if nb_sent == 0:
-                obj.status = self.fail_status
+                self.save_state(obj, self.fail_status)
             else:
-                obj.status = self.sent_status
-            obj.save()
+                self.save_state(obj, self.sent_status)
         return 0, "OK"

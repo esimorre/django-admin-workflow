@@ -35,18 +35,15 @@ class VacationExecutor(Executor):
             delta = obj.end - obj.begin
             if delta.days < 0 or  'bad request' in obj.comment:
                 obj.comment = obj.comment + "\nRequest invalid"
-                obj.status = "DRAFT"
-                obj.save()
+                self.save_state(obj, "DRAFT")
                 continue
             account = UserAccount.objects.get(user=obj.creator)
             if delta.days + 1 > account.provision:
                 obj.comment = obj.comment + "\nInsufficient provision"
-                obj.status = "DRAFT"
-                obj.save()
+                self.save_state(obj, "DRAFT")
                 continue
             # OK to submited
-            obj.status = "submited"
-            obj.save()
+            self.save_state(obj, "submited")
 
     def _archive(self, q):
         for obj in q:
@@ -56,8 +53,7 @@ class VacationExecutor(Executor):
                 account = UserAccount.objects.get(user=obj.creator)
                 account.provision -= (delta.days + 1)
                 account.save()
-                obj.status = "archived"
-                obj.save()
+                self.save_state(obj, "archived")
 
 
 # override create_data for command add_sample
