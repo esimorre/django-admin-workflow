@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 
 from django_admin_workflow.models import Space
+from django_admin_workflow.management.commands.run_executors import Command as RunCmd
 
 
 class BaseWorkflowTestCase(TestCase):
@@ -36,3 +37,27 @@ class BaseWorkflowTestCase(TestCase):
         self.assertEqual(rep.status_code, 200)
         self.assertEqual( len(rep.context_data['app_list']), len(apps))
         self.assertEqual( rep.context_data['app_label'], apps[0])
+
+    def run_auto(self, executor, status=None):
+        RunCmd().handle([executor], status=[status])
+
+    def get_form_data(self, url):
+        rep = self.client.get(url)
+        self.assertEqual(rep.status_code, 200)
+        form = {}
+        form.update(rep.context_data['adminform'].form.initial)
+        return form
+
+    def read_list(self, prefix_url, name=None, logout=True):
+        """
+        :prefix_url: change list prefix url (typically "/app/model/")
+        :name: connect with name if given
+        :logout: disconnect if True
+        :return: queryset
+        """
+        if name: self.connect(name)
+        rep = self.client.get(prefix_url)
+        self.assertEqual(rep.status_code, 200)
+        qs = rep.context_data['cl'].queryset
+        if logout: self.logout()
+        return qs
