@@ -6,7 +6,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name='django_admin_workflow',
-    version='0.8.1',
+    version='0.8.2',
     description='A workflow app for django admin',
     url='https://github.com/esimorre/django-admin-workflow',
     
@@ -15,7 +15,7 @@ setup(
     
     platforms=['any'],
     packages=["django_admin_workflow", "django_admin_workflow.management.commands",
-              "django_admin_workflow.test"],
+              "django_admin_workflow.test", "django_admin_workflow.migrations"],
     package_data = {"django_admin_workflow.locale": ["*.po", "*.mo"],
                     "django_admin_workflow.templates": ["*.html", "*.js"]},
     include_package_data=True,
