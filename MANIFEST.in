@@ -1,0 +1,2 @@
+graft django_admin_workflow/templates
+graft django_admin_workflow/locale
