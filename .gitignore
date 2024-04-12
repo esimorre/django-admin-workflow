@@ -2,3 +2,6 @@
 db.sqlite3
 *.pyc
 #*.mo
+build
+dist
+*.egg-info
